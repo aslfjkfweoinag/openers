@@ -1,0 +1,2580 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#f6f6f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1216" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-title" content="Openers">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Opening lines, by name</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<style>
+/* Phone-first. The page is operated one-handed, standing up, in the middle of
+   doing something else — so: sticky search, big targets, one column, and type
+   sized for a screen held at arm's length. */
+
+:root {
+  --paper: #f6f6f3;
+  --panel: #ffffff;
+  --ink: #14171c;
+  --ink-2: #666d79;      /* grey biased blue, toward the accent */
+  --rule: #e2e4e0;
+  --accent: #2b49d6;
+  --accent-soft: #ebeefc;
+  --mark: #ffe45c;       /* highlighter — marks the name inside the line */
+  --mark-ink: #14171c;
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --radius: 12px;
+  --tap: 44px;
+}
+
+/* Style through the tokens only, so the viewer's theme toggle can win in both
+   directions by redefining them. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0f1216;
+    --panel: #171b21;
+    --ink: #e9ecef;
+    --ink-2: #8a929e;
+    --rule: #262c34;
+    --accent: #8fa5ff;
+    --accent-soft: #1b2233;
+    --mark: #5a4d12;
+    --mark-ink: #ffe9a3;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0f1216;
+  --panel: #171b21;
+  --ink: #e9ecef;
+  --ink-2: #8a929e;
+  --rule: #262c34;
+  --accent: #8fa5ff;
+  --accent-soft: #1b2233;
+  --mark: #5a4d12;
+  --mark-ink: #ffe9a3;
+}
+
+:root[data-theme="light"] {
+  --paper: #f6f6f3;
+  --panel: #ffffff;
+  --ink: #14171c;
+  --ink-2: #666d79;
+  --rule: #e2e4e0;
+  --accent: #2b49d6;
+  --accent-soft: #ebeefc;
+  --mark: #ffe45c;
+  --mark-ink: #14171c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 17px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  /* Stops iOS bumping the text size when the phone turns sideways. */
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px calc(56px + env(safe-area-inset-bottom));
+}
+
+/* --- masthead ------------------------------------------------------------- */
+.masthead {
+  padding: 28px 0 16px;
+}
+
+.masthead h1 {
+  margin: 0 0 6px;
+  font: 600 30px/1.15 var(--serif);
+  letter-spacing: -.01em;
+  text-wrap: balance;
+}
+
+.masthead p {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+/* --- sticky search -------------------------------------------------------- */
+/* On a phone you search, scroll, then want to search again — the box has to
+   still be there when you get back. */
+.searchbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 10px 0;
+  background: var(--paper);
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s;
+}
+
+.searchbar.stuck { border-bottom-color: var(--rule); }
+
+.search {
+  position: relative;
+  display: flex;
+  gap: 8px;
+}
+
+#name-input {
+  flex: 1;
+  min-width: 0;              /* or the input refuses to shrink and the page scrolls sideways */
+  height: var(--tap);
+  padding: 0 14px;
+  /* 16px minimum, or iOS Safari zooms the whole page on focus. */
+  font: 17px var(--sans);
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+#name-input:focus-visible,
+#name-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+#surprise {
+  height: var(--tap);
+  padding: 0 14px;
+  white-space: nowrap;
+  font: 15px var(--sans);
+  color: var(--ink-2);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+#suggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+  max-height: 46vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#suggest li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#suggest li.on { background: var(--accent-soft); }
+.s-name { font-weight: 600; }
+.s-meta { color: var(--ink-2); font: 12px var(--mono); }
+
+/* --- name header + filters ------------------------------------------------ */
+#result-meta {
+  margin: 20px 0 12px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+#result-meta strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+  font: 600 24px/1.2 var(--serif);
+}
+
+#result-meta .stat { font-family: var(--mono); font-size: 13px; }
+
+/* Chips scroll sideways rather than wrapping into three rows on a phone. */
+#filters {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px 16px;
+  padding: 0 16px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+
+#filters::-webkit-scrollbar { display: none; }
+
+.fchip {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  min-height: 36px;
+  padding: 0 14px;
+  font: 14px var(--sans);
+  color: var(--ink-2);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.fchip.on {
+  color: var(--panel);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* --- lines ---------------------------------------------------------------- */
+#results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.line {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 12px 14px 12px;
+}
+
+.line-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font: 11px var(--mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.chip-pun, .chip-wordplay { color: var(--accent); }
+.cheese { margin-left: auto; letter-spacing: 1px; }
+
+.text { margin: 0 0 10px; overflow-wrap: break-word; }
+
+/* The whole tool is about spotting a name inside other words, so the name is
+   marked wherever it lands. */
+.text mark {
+  background: var(--mark);
+  color: var(--mark-ink);
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.copy {
+  width: 100%;
+  min-height: 38px;
+  font: 15px var(--sans);
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.copy.done { color: var(--panel); background: var(--accent); border-color: var(--accent); }
+
+#more {
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 12px;
+  font: 15px var(--sans);
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.empty { color: var(--ink-2); }
+
+/* --- footer --------------------------------------------------------------- */
+footer {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+footer p { margin: 0 0 8px; max-width: 52ch; }
+
+/* Hover styles only where there is a real pointer — on a phone they stick on
+   after a tap and read as a stuck selection. */
+@media (hover: hover) {
+  #surprise:hover, .fchip:hover, .copy:hover, #more:hover { color: var(--accent); border-color: var(--accent); }
+  .fchip.on:hover { color: var(--panel); }
+  #suggest li:hover { background: var(--accent-soft); }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+@media (min-width: 560px) {
+  .wrap { padding-bottom: 72px; }
+  .masthead { padding-top: 40px; }
+  .masthead h1 { font-size: 36px; }
+  .copy { width: auto; margin-left: auto; display: block; padding: 0 16px; }
+}
+
+</style>
+</head>
+<body>
+<!--APP-START-->
+<div class="wrap">
+  <header class="masthead">
+    <h1>Opening lines, by name</h1>
+    <p>Ten openers built around one specific name. <span id="stat-total">2,000</span> names in the database — anything else still works off the letters.</p>
+  </header>
+
+  <div class="searchbar">
+    <div class="search">
+      <input id="name-input" type="text" placeholder="Type a name…" autocomplete="off"
+             autocapitalize="words" spellcheck="false" enterkeyhint="search"
+             role="combobox" aria-expanded="false" aria-controls="suggest" aria-label="Name">
+      <button id="surprise" type="button">Random</button>
+      <ul id="suggest" role="listbox" hidden></ul>
+    </div>
+  </div>
+
+  <p id="result-meta"></p>
+  <div id="filters"></div>
+  <div id="results"></div>
+  <div id="controls" hidden>
+    <button id="more" type="button">Give me ten different ones</button>
+  </div>
+
+  <footer>
+    <p>The dots are cheese, not quality — ●●● is a full pun, ○○○ is something you could send without wincing. A mixed set beats ten puns in a row.</p>
+    <p>Popularity ranks are approximate, reconstructed from recent SSA baby-name data. Read the line before you send it; the good ones are the ones that sound like you.</p>
+  </footer>
+</div>
+<!--APP-END-->
+
+<script>
+/* eslint-env browser */
+// The interface. Deliberately a plain script rather than a module, so the build
+// can inline it into a single self-contained file alongside the engine.
+// Everything it needs arrives through `api`.
+
+window.mountApp = function mountApp(api) {
+  const $ = (sel) => document.querySelector(sel);
+
+  const input = $('#name-input');
+  const suggestBox = $('#suggest');
+  const results = $('#results');
+  const meta = $('#result-meta');
+  const controls = $('#controls');
+  const searchbar = $('.searchbar');
+
+  let current = null; // { name, entry }
+  let round = 0;
+  let filter = 'all';
+
+  const FILTERS = {
+    all: { label: 'Everything', opts: {} },
+    wordplay: { label: 'Name puns', opts: { categories: ['pun', 'wordplay'] } },
+    playful: { label: 'Playful', opts: { categories: ['playful'] } },
+    question: { label: 'Ask something', opts: { categories: ['question'] } },
+    lowkey: { label: 'Low cheese', opts: { maxCheese: 1 } },
+  };
+
+  const CATEGORY_LABEL = {
+    pun: 'pun', wordplay: 'wordplay', playful: 'playful',
+    question: 'question', sincere: 'sincere', data: 'stats',
+  };
+
+  $('#stat-total').textContent = api.TOTAL.toLocaleString();
+
+  const genderWord = (g) => (g === 'f' ? 'girls’ name' : g === 'm' ? 'boys’ name' : 'unisex');
+
+  const escapeHtml = (s) =>
+    s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // Mark every occurrence of the name. Splitting on the RAW text and escaping the
+  // pieces afterwards keeps names with an apostrophe working — escaping first
+  // would turn O'Brien into O&#39;Brien and the match would never land.
+  function highlight(text, name) {
+    if (!name) return escapeHtml(text);
+    const parts = text.split(name);
+    return parts.map(escapeHtml).join(`<mark>${escapeHtml(name)}</mark>`);
+  }
+
+  // --- type-ahead ------------------------------------------------------------
+  let hits = [];
+  let cursor = -1;
+
+  function renderSuggestions() {
+    if (!hits.length) {
+      suggestBox.hidden = true;
+      suggestBox.innerHTML = '';
+      input.setAttribute('aria-expanded', 'false');
+      return;
+    }
+    suggestBox.innerHTML = hits
+      .map((h, i) => `
+        <li role="option" aria-selected="${i === cursor}" class="${i === cursor ? 'on' : ''}" data-name="${h.name}">
+          <span class="s-name">${escapeHtml(h.name)}</span>
+          <span class="s-meta">${genderWord(h.gender)} · #${h.rank}</span>
+        </li>`)
+      .join('');
+    suggestBox.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+  }
+
+  input.addEventListener('input', () => {
+    hits = api.search(input.value, 8);
+    cursor = hits.length ? 0 : -1;
+    renderSuggestions();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!hits.length) return;
+      e.preventDefault();
+      cursor = (cursor + (e.key === 'ArrowDown' ? 1 : hits.length - 1)) % hits.length;
+      renderSuggestions();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      // A name nobody has heard of is still a valid search — several families
+      // need nothing but the letters.
+      show(cursor >= 0 && hits[cursor] ? hits[cursor].name : input.value);
+      input.blur(); // drops the phone keyboard so the results are visible
+    } else if (e.key === 'Escape') {
+      suggestBox.hidden = true;
+    }
+  });
+
+  suggestBox.addEventListener('mousedown', (e) => {
+    const li = e.target.closest('li[data-name]');
+    if (li) { e.preventDefault(); show(li.dataset.name); input.blur(); }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!suggestBox.contains(e.target) && e.target !== input) renderSuggestionsClosed();
+  });
+
+  function renderSuggestionsClosed() {
+    hits = [];
+    renderSuggestions();
+  }
+
+  $('#surprise').addEventListener('click', () => {
+    const all = api.ALL_NAMES;
+    show(all[Math.floor(Math.random() * all.length)].name);
+  });
+
+  // --- rendering -------------------------------------------------------------
+  function show(rawName, keepRound) {
+    const name = api.normalizeName(rawName);
+    if (!name) return;
+    if (!keepRound) round = 0;
+    current = { name, entry: api.lookup(name) };
+    input.value = name;
+    renderSuggestionsClosed();
+    render();
+  }
+
+  function render() {
+    if (!current) return;
+    const { name, entry } = current;
+    const out = api.linesFor(name, entry || {}, { round, ...FILTERS[filter].opts });
+
+    meta.innerHTML = entry
+      ? `<strong>${escapeHtml(name)}</strong><span class="stat">${genderWord(entry.gender)} · about #${entry.rank} in America</span>`
+      : `<strong>${escapeHtml(name)}</strong><span class="stat">not in the top 2,000 — built from the letters</span>`;
+
+    controls.hidden = false;
+
+    if (!out.lines.length) {
+      results.innerHTML = `<p class="empty">No lines survive that filter for ${escapeHtml(name)}. Try “Everything”.</p>`;
+      return;
+    }
+
+    results.innerHTML = out.lines
+      .map((line, i) => `
+        <article class="line">
+          <div class="line-head">
+            <span>${i + 1}</span>
+            <span class="chip-${line.category}">${CATEGORY_LABEL[line.category]}</span>
+            <span class="cheese" title="Cheese level ${line.cheese} of 3">${'●'.repeat(line.cheese) + '○'.repeat(Math.max(0, 3 - line.cheese))}</span>
+          </div>
+          <p class="text">${highlight(line.text, name)}</p>
+          <button class="copy" data-idx="${i}" type="button">Copy</button>
+        </article>`)
+      .join('');
+
+    results.querySelectorAll('.copy').forEach((btn) => {
+      btn.addEventListener('click', () => copy(out.lines[Number(btn.dataset.idx)].text, btn));
+    });
+  }
+
+  async function copy(text, btn) {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } catch {
+      // The async clipboard needs a secure context, which file:// is not — fall
+      // back so the offline single-file build still copies.
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, text.length); // iOS ignores select() on its own
+      try { ok = document.execCommand('copy'); } catch { ok = false; }
+      ta.remove();
+    }
+    const was = btn.textContent;
+    btn.textContent = ok ? 'Copied' : 'Press and hold the line to copy';
+    btn.classList.toggle('done', ok);
+    setTimeout(() => { btn.textContent = was; btn.classList.remove('done'); }, 1600);
+  }
+
+  $('#more').addEventListener('click', () => {
+    round++;
+    render();
+  });
+
+  // --- filter chips ----------------------------------------------------------
+  const chipRow = $('#filters');
+  chipRow.innerHTML = Object.entries(FILTERS)
+    .map(([key, f]) => `<button type="button" class="fchip${key === 'all' ? ' on' : ''}" data-filter="${key}">${f.label}</button>`)
+    .join('');
+  chipRow.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-filter]');
+    if (!btn) return;
+    filter = btn.dataset.filter;
+    round = 0;
+    chipRow.querySelectorAll('.fchip').forEach((b) => b.classList.toggle('on', b === btn));
+    render();
+  });
+
+  // The sticky search bar only earns a rule once it has something above it.
+  const onScroll = () => searchbar.classList.toggle('stuck', window.scrollY > 8);
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // A name on screen at load beats an empty box.
+  show('Emma');
+};
+
+</script>
+<script>
+(function(){
+// The 2000 most popular first names in America, in approximate popularity order.
+//
+// Compiled from recent U.S. Social Security Administration baby-name popularity
+// (the SSA national data is not fetchable from this build environment, so the
+// ordering is a good-faith reconstruction rather than a byte-exact copy of a
+// given year's file). Ranks are therefore APPROXIMATE — treat "#12 most popular"
+// as "very common" rather than as a citation. Spelling and gender tagging are
+// the parts the line engine actually depends on, and those are reliable.
+//
+// Rank is per-gender: FEMALE[0] is the #1 girls' name, MALE[0] the #1 boys' name.
+// Duplicates across the two lists are fine — a name in both is tagged unisex by
+// build.js, which also dedupes within a list and slices to the exact counts.
+
+const FEMALE_TARGET = 1100;
+const MALE_TARGET = 900;
+
+const FEMALE_RAW = `
+Olivia Emma Charlotte Amelia Sophia Isabella Ava Mia Evelyn Luna
+Harper Camila Sofia Scarlett Elizabeth Eleanor Emily Chloe Mila Violet
+Penelope Gianna Aria Abigail Ella Avery Hazel Nora Layla Lily
+Aurora Nova Ellie Madison Grace Isla Willow Zoe Riley Stella
+Eliana Ivy Victoria Emilia Zoey Naomi Hannah Lucy Elena Lillian
+Maya Leah Paisley Addison Natalie Valentina Everly Delilah Leilani Madelyn
+Kinsley Ruby Sophie Alice Genesis Aubrey Serenity Autumn Bella Skylar
+Josephine Athena Clara Savannah Audrey Lydia Iris Caroline Brooklyn Maria
+Quinn Piper Nevaeh Cora Vivian Melody Anna Sarah Allison Gabriella
+Ariana Rylee Ayla Kennedy Sadie Hailey Jade Natalia Adeline Liliana
+Emery Josie Julia Rose Alina Ada Ariella Charlie Peyton Millie
+Kylie Reagan Ximena Amaya Eden Daisy Arya Freya Adalynn Melanie
+Sloane Elsie Katherine Ryleigh Faith Amara Ruth Alaia Lucia London
+Kehlani Journee Blakely Anastasia Summer Juniper Sara Andrea Nyla Norah
+Georgia Amina Lyla Vera Brielle Aliyah Zuri Margaret Juliette Kaylee
+Magnolia Rosalie Arianna Remi Brianna Malia Molly Sienna Lilly Aspen
+June Mary Jasmine Zara Wren Kaia Valerie Genevieve Nicole Alaina
+Catalina Esther Presley Marley Selena Trinity Camille Hadley Alana Alivia
+Sage Mackenzie Oakley Diana Michelle Ophelia Nina Amira Adalyn Lainey
+Journey Lena Harmony Cecilia Ariel Ana Isabelle Callie Reese Jordyn
+Elliana Vivienne Alexandra Maeve Rachel Alexa Adaline Emersyn Alani Finley
+Emerson Alyssa Alessandra Cataleya Alexis Gracie Lila Rowan Angela Sydney
+Alayna Blake Noelle Palmer Charlee Nia Adelyn Rebecca Amber Jane
+Kailani Braelynn Nathalie Laila Winter Talia Miriam Fiona Dakota Evangeline
+Vanessa Rosie Lyric Phoebe Gemma Ariyah Teagan Maggie Lucille Elaina
+Kayla Mya Elise Julieta Adelaide Legacy Saylor Miracle Maisie Danielle
+Ari Frances Antonella Amiyah Bailey Jacqueline Julie Kimberly Heidi Aitana
+Miranda Adriana Alessia Raelynn Kamila Colette Everleigh Mariana Brynlee Tessa
+Ainsley Sutton Lilah Mabel Alexandria Sarai Wynter Daniela Camilla Rosemary
+Haven Allie Kaitlyn Ellis Kali Alexia Lyra Angelina Melissa Sylvia
+Elle Aniyah Marlee Katie Amanda Laura Mira Carmen Lola Selah
+Serena Joy Matilda
+Poppy Aurelia Meredith Marilyn Bristol Kaylani Rory Regina Simone Elianna
+Novalee Averie Cassidy Jolene Kailey Lucianna Nell Astrid Marie Anaya
+Anne Kensley Tatum Adelina Bianca Whitney Skye Karsyn Hallie Sabrina
+Louisa Rosa Alma Aisha Kaliyah Emmalyn Zariah Rebekah Julianna Maren
+Cameron Alicia Kyla Erin Charley Anniston Braelyn Lorelei Aubrielle Veronica
+Karina Emory Reign Jenna Lennon Amoura Nala Aliza Etta Angel
+Amari Della Blair Adley Alaya Kate Adalee Priscilla Sasha Journi
+Milani Ryan Sarahi Zelda Amelie Thea Maia Kiara Karla Leia
+Fatima Paige Rosalia Lorelai Zaniyah Ashley Meadow Salma Estella Marianna
+Kinley Charleigh Elliot Jimena Katalina Hattie Aubree Adelynn Blaire Milena
+Livia Louise Frankie Sunny Ellianna Maryam Elyse Renata Rosalyn Danna
+Denver Julissa Marlowe Zaria Aubrie Jazlyn Malani Hana Itzel Ivory
+Noa Kamryn Rylan Nyra Kaylie Bonnie Opal Aylin Nayeli Scarlet
+Kora Liv Sierra Ember Holly Chelsea Nicolette Aliana Amaia Jayla
+Bethany Marisol Ruby Anya Adrianna Alaiya Kaydence Kimber Zainab Alison
+Leighton Lea Aleah Corinne Shiloh Emmy Fallon Giselle Guadalupe Zahra
+Aleena Amirah Annalise Ariah Astrid Belle Brooke Cadence Celeste Clarissa
+Daphne Delaney Edith Eloise Elora Erica Faye Felicity Gabrielle Georgina
+Harlow Helen Imani Ingrid Jayleen Jessica Joanna Jocelyn Journei Judith
+Kaia Karter Katalea Kendall Kenzie Khloe Lacey Laney Larissa Laurel
+Leilany Lennox Lexi Lilianna Lindsay Logan Lucy Lyanna Macie Madeline
+Makenna Marina Marlie Maya Mckenna Melina Mikayla Monica Nadia Nala
+Naya Nellie Noelia Nyomi Octavia Paisleigh Paloma Paris Parker Patricia
+Pearl Perla Persephone Piper Raegan Raelyn Raina Reagan Remington Rhea
+Riley Rivka Roselyn Rowen Royal Ryan Sailor Samantha Sarai Scarlette
+Selene Shelby Sloan Sophia Stevie Sunny Susan Tatiana Taylor Teresa
+Tiana Valeria Vienna Violeta Virginia Waverly Wilhelmina Xiomara Yara Yaretzi
+Zaniya Zaylee Zoya Abby Adalie Adelaide Ainhoa Aitana Alaina Alanna
+Aleigha Alessia Alexandrea Aliya Allyson Alondra Amalia Amaris Amayah Amelia
+Amirah Analia Anastasia Angelica Angie Aniya Annabel Annabella Annabelle Annalee
+Anne Annika Antonia Araceli Arden Aria Ariadne Arielle Arleth Armani
+Artemis Ashlyn Athena Aubrianna Audrina Augustine Aurelia Autumn Ava Avianna
+Ayleen Azalea Bailee Barbara Beatrice Beatriz Belen Bellamy Berkley Bexley
+Billie Blaire Blakelee Bonnie Bria Briana Bridget Briella Brinley Britney
+Brittany Brooklynn Brylee Cadence Cali Calliope Camryn Candace Cara Carla
+Carly Carolina Carter Casey Cassandra Catherine Cattleya Cecelia Celia Chana
+Chandler Charlize Charlotte Chaya Cheyenne Christina Cielo Claire Clementine Coco
+Colbie Collins Connie Constance Cordelia Crystal Cynthia Dahlia Dakota Dallas
+Dania Danica Daniella Danna Davina Dayana Deborah Delia Demi Denise
+Destiny Diane Dior Dolores Dominique Dorothy Dulce Dylan Ebony Edie
+Eileen Elaine Eleanora Elena Eliza Elizabeth Ellen Elliott Elodie Elsa
+Ember Emelia Emerie Emilee Emmaline Emmeline Emmalynn Erin Esme Esmeralda
+Estelle Estrella Eve Evelynn Everleigh Evie Ezra Farrah Fernanda Flora
+Florence Freyja Gabriela Gaia Galilea Gia Giana Gianella Gigi Gina
+Ginevra Giovanna Gloria Golda Greta Gwen Gwendolyn Hadassah Haisley Halle
+Harleigh Harley Harmoni Hattie Hayden Haylee Hayley Hazelle Heaven Heidi
+Helena Henley Hilda Hollis Honor Hope Iliana Ilyana Indie Ines
+Irene Isabel Isabela Isis Islabelle Itzayana Ivanna Ivelisse Izabella Jacqueline
+Jada Jaelyn Jaliyah Jamie Janelle Janet Jasmin Jayda Jayde Jazmin
+Jemma Jenesis Jennifer Jenny Jessa Jewel Jillian Joan Joanne Joelle
+Johanna Jolie Jordan Josefina Joslyn Joyce Juana Juliana Julianne Juliet
+Juniper Justice Kadence Kaelyn Kailyn Kaisley Kalani Kaleigh Kallie Kamari
+Kamille Kara Karen Karis Karsen Kassidy Katalina Kataleya Katelyn Katharine
+Kathryn Kaycee Kayleigh Keira Kelly Kelsey Kenna Kennedi Kensington Keziah
+Kiana Kimora Kira Kirsten Kora Krystal Kyleigh Kylee Kyra Lacie
+Ladainian Laila Lakelyn Lana Landry Lara Laurel Lauren Laylah Leanna
+Legacy Leia Leila Leilany Lennon Leona Leslie Lexie Liana Libby
+Liberty Lilianna Lilith Lillie Lilyana Lina Linda Lindsey Linnea Lisa
+Liv Lizbeth Logan London Londyn Lottie Lucero Luciana Lucinda Ludmila
+Luella Lumi Lyanna Lylah Lynn Lyric Mabry Macey Maci Mackenna
+Madalyn Maddison Madilyn Madilynn Maeva Magdalena Maia Maisy Makayla Makenzie
+Malaya Maliyah Mallory Mara Marceline Marcella Margot Margaux Mariah Mariam
+Maribel Marie Mariel Marisa Marissa Marjorie Marlene Marley Martha Mavis
+Maxine Mckinley Meilani Melany Melina Melisa Mercy Merida Mia Micah
+Michaela Mikaela Milagros Milan Milania Mimi Minerva Mira Mireya Miriam
+Missy Moira Monroe Montserrat Morgan Muriel Myah Myla Myra Nadine
+Nancy Naomi Natasha Nayla Nadia Neriah Nevaeh Niamh Nicolette Nika
+Nila Noor Nora Norma Nova Novah Nyla Nylah Oaklee Oakleigh
+Oaklynn Olive Oliviah Ophelia Oralia Paisley Paislee Paloma Pamela Paola
+Patience Paulina Payton Penny Perry Petra Philippa Phoenix Pia Presleigh
+Princess Priya Promise Prudence Quincy Rachael Raelynn Rania Raquel Raven
+Rayna Rayne Reagan Regan Renee Rhiannon Ria Rihanna River Roberta
+Robin Rocio Romina Ronnie Rosalind Roselyn Rosemarie Rosalina Rowena Roxanne
+Royalty Rubi Ruthie Ryann Rylie Sabine Sadie Saige Salem Sally
+Samara Samira Sandra Saoirse Sarina Sasha Savanna Sawyer Sayla Scarlet
+Selah Selina Serafina Seraphina Shane Shania Shannon Sharon Shayla Shea
+Shelby Shiloh Shirley Sia Sidney Siena Simone Sky Skyla Skyler
+Solana Soleil Solange Sonia Sophie Stefania Stephanie Stormi Sunday Susanna
+Sutton Sybil Sylvie Tabitha Tallulah Tamara Tara Taryn Tatiana Tatum
+Tayla Teagan Tegan Tenley Thalia Thea Theodora Tiffany Tinsley Tori
+Trinity Tulip Valentina Valery Vada Vanessa Veda Vega Vella Venus
+Vera Verity Vida Viola Virginia Vivi Viviana Wanda Wendy Wesley
+Whitley Willa Winnie Wren Wynn Xena Xiomara Yamileth Yara Yasmin
+Yesenia Yolanda Yvette Yvonne Zada Zahara Zaria Zaylee Zelda Zena
+Zoya Zuri Zyla Adalind Adele Adira Adley Adrienne Aeris Agatha
+Aileen Ainslee Aisling Alaska Alba Alberta Alden Aldrin Aleeya Alia
+Alianna Alicia Aliyana Allegra Allura Alora Alyson Amaia Amani Amaris
+Ambrose Amelie Amora Amoret Anais Anaya Andi Angeline Anika Anisa
+Annette Annora Antonia Anwen Apollonia April Arabella Araya Arcadia Ariane
+Arlette Arlo Armani Arnelle Arwen Ashby Ashlynn Asia Aspyn Astoria
+Atarah Athalia Aubrey Augusta Aurea Aveline Avianna Aviva Azaria Azura
+Bailey Basil Bay Bea Beckett Bellamy Bergen Bernadette Bethel Betsy
+Beverly Bexlee Blossom Bly Bree Brenna Bridgette Brighton Bristol Brinlee
+Bronte Brooklyn Bryn Brynn Cadenza Cailyn Caitlin Caleigh Calla Callista
+Cambria Camden Cameron Campbell Candice Capri Carina Carmela Caroline Carrie
+Cassia Catalina Cecily Celestia Celine Chandra Chanel Charity Charli Charlize
+Chelsey Cher Cherry Chiara Christy Cira Claudia Clarabelle Clover Colleen
+Combs Coraline Corinna Cosette Courtney Cove Cressida Cricket Cyrene Dagny
+Daleyza Dana Danika Daphne Darby Daria Darla Davi Dawn Dayana
+Deja Delilah Delphine Denali Devon Devyn Diamond Dinah Dixie Domenica
+Dominga Donna Dora Doris Dove Drew Duchess Eartha Echo Edith
+Effie Elaia Eleanore Elettra Elia Elin Elisa Elisabeth Elissa Ellery
+Ellison Elora Elsie Elyse Emberly Emberlynn Emi Emiliana Emmalee Emmalyn
+Ensley Erica Eris Esperanza Estefania Estelle Etta Eulalia Eunice Euphemia
+Evangelina Evanna Evelina Everlee Everly Evita Faith Fatimah Fay Felicia
+Fern Fia Fifi Finlee Fleur Flor Florencia Frida Gabby Gail
+Galia Gemini Genesis Genoa Georgiana Geraldine Gia Gianna Gilda Gisele
+Giulia Glenda Godiva Grady Gwyneth Hadley Hailee Halcyon Halo Hanna
+Harlem Harriet Haruka Haylie Hazel Hedy Helene Hera Hermione Hessa
+Hilary Holland Honora Huntley Ida Idalia Ila Ilana Ileana Ilsa
+Imogen Inaya Indiana Indigo India Ines Inez Iona Ireland Irie
+Isadora Isha Isidora Isolde Itzayanna Ivory Izzy Jacinta Jaclyn Jaden
+Jael Jaelynn Jaimie Jalen Jamila Jana Jasmine Jayden Jazlynn Jean
+Jeanette Jemima Jenevieve Jersey Jessamine Jetta Jewell Jill Jinx Joani
+Jocelynn Jodie Joely Johanna Jolene Jonelle Jorja Josephina Joslynn Joy
+Juanita Jubilee Judy Jules Julissa Juno Justina Kaelynn Kahlani Kaila
+Kaitlin Kaiya Kalea Kalliope Kambria Kamea Kamiyah Kandace Kanoa Karlee
+Karsyn Kasey Kassandra Katelynn Katharina Kathleen Katia Katrina Kayce Kaylani
+Keely Keila Kelsie Kendra Kenley Kennedy Kensley Kerrigan Keyla Khaleesi
+Kianna Kimberley Kimiko Kinslee Kinsley Kloe Kori Kristen Kristina Kyleigh
+Kylah Kyndall Lacy Laine Lakyn Lanie Laniyah Lauryn Layna Leandra
+Leanne Leena Leighla Leilah Lennox Leonie Leslee Letitia Lexa Leyla
+Lia Liana Lianna Lidia Lila Lilac Lilianna Lilith Lillianna Lilliana
+Lin Lisette Lissette Livia Lizzie Loraine Lorelie Loretta Lori Louella
+Lourdes Lovie Lowen Lucia Lucienne Lucy Ludovica Luella Lula Lumi
+Luz Lyanne Lyla Lyndsey Lynette Lyndon Lyric Macarena Macy Madalena
+Madelaine Madilyn Madisyn Maelynn Magali Magnolia Mahogany Maja Malaika Malaya
+Maliah Malina Manuela Mara Marcelina Marceline Marely Margarita Margo Mariel
+Marilee Marina Marisela Marlena Marlowe Marnie Marsha Matilda Mattie Maura
+Maxwell Maya Mayra Mckayla Meadow Megan Meghan Melina Melisandre Melody
+Mercedes Meredith Merrick Mesa Mia Michele Mikaila Milla Millicent Minka
+Mira Mirabel Mirabella Miracle Miren Missouri Misty Molly Mona Monique
+Montana Morgan Mylah Myla Myra Nadia Nala Nalani Nancy Naomie
+Natalee Natalya Nathalia Navy Nayeli Nell Nellie Neva Nia Nicola
+Nicolina Nika Nikita Nikki Nila Nina Noa Noelle Noemi Nola
+Nora Noor Norah Nour Nyah Nyra Oaklyn Oceana Octavia Odalys
+Odessa Odette Ofelia Olina Olympia Ondine Onyx Oriana Orla Osiris
+Ottilie Paisleigh Palmer Paola Paris Parker Patrice Paula Pauline Paxton
+Payton Pearl Peggy Penelope Perla Perrie Petunia Peyton Phaedra Phoenix
+Pia Pilar Pippa Polly Poppy Portia Prairie Praise Precious Presley
+Primrose Priscilla Priya Prue Quinley Quinn Rae Raegan Rafaela Raina
+Ramona Randi Raphaela Raya Rayna Reba Rebel Reese Regina Reign
+Reina Remi Remy Rena Renata Rene Rey Rhoda Rhonda Rihana
+Rikki Rinoa Rita Riva River Roma Romy Rooney Rosalee Rosalina
+Rosanna Rosaria Roselle Rosemary Rosetta Rowan Roxie Ruby Rue Rumi
+Runa Ruthanne Ryan Rylan Ryleigh Sabina Sabrina Sade Saffron Sahara
+Saige Sakura Salem Salome Samira Sandy Saniya Santana Sapphira Sarah
+Sariah Sasha Savanah Scarlett Scout Selah Selena Selina September Serena
+Sereia Shaila Shakira Shalom Shea Sheila Shelly Sheridan Sherry Shiloh
+Sidra Sierra Signe Simona Sinead Siobhan Sky Sloane Sofie Solene
+Sonja Sonnet Sophia Sora Sorrel Stacy Stargazer Starla Stella Stephanie
+Stevie Stormy Sunniva Suri Susannah Suzanne Sydney Sylvia Sylvie Tabitha
+Talia Tallulah Tamsin Tania Tanya Tasha Tatianna Tatum Tawny Teagan
+Temperance Teodora Tessa Thalia Thandi Thea Thelma Theresa Tiana Tierra
+Tilly Tina Tinley Tirzah Tishana Tonya Topaz Trina Trisha Trudy
+Tuesday Tyler Ulyana Uma Una Unique Ursula Valencia Valentine Valeria
+Vanna Vashti Veda Velma Venice Verena Verity Veronika Vespera Victory
+Vidalia Vienna Vika Vina Viola Violette Vivienne Waverly Wendy Wesley
+Whitley Wilhelmina Willa Willowdean Winifred Winona Winter Wisteria Wynn Wynter
+Xandra Xena Xiara Ximena Xitlali Yaneli Yamila Yasmine Yelena Yuna
+Yuri Yvaine Zadie Zaina Zainab Zamora Zana Zaniyah Zara Zaria
+Zelie Zena Zephyra Zia Zinnia Ziva Zoraya Zosia Zuleika Zulema
+`;
+
+const MALE_RAW = `
+Liam Noah Oliver James Elijah Mateo Theodore Henry Lucas William
+Benjamin Levi Sebastian Jack Ezra Michael Daniel Leo Owen Samuel
+Hudson Alexander Asher Luca Ethan John David Jackson Joseph Mason
+Luke Matthew Julian Dylan Elias Jacob Maverick Gabriel Logan Aiden
+Thomas Isaac Miles Grayson Santiago Anthony Wyatt Carter Jayden Ezekiel
+Caleb Cooper Josiah Charles Christopher Isaiah Nolan Cameron Nathan Joshua
+Kai Waylon Angel Roman Eli Lincoln Jonathan Adrian Austin Ryan
+Andrew Jaxon Weston Silas Jeremiah Emmett Micah Hunter Rowan Xavier
+Beau Adam Everett Jose Jace Ian Wesley Bennett Landon Nicholas
+Aaron Declan Amir Ryder Brooks Axel Christian Jordan Colton Ashton
+Carson Easton Vincent Enzo Nathaniel Parker Zion Damian Xander Sawyer
+Jameson Jason Greyson Kayden Ryker Arthur Emiliano Beckham Adriel Riley
+Colt Braxton Tyler Myles Gael Zachary Ivan Legend Bryson Evan
+Alan Bentley Kaiden Milo Brayden Judah Messiah Karter Graham Jesus
+Barrett Abel Justin Jayce Chase Rhett Kingston Calvin Brandon Atlas
+Max Malachi Antonio Emmanuel Bryce August Beckett Nico Cash Tucker
+Jasper Dean Ace Arlo Walker Jeremy Alejandro Timothy Lorenzo Blake
+Kevin Marcus Dawson Bradley Kyrie Finn Otto Diego King Rafael
+Andres Elliot Peter Griffin Bodhi Cohen Malakai Simon Israel Knox
+Remington Zayden Camden Reid Avery Jonah Eric Steven Patrick Bryan
+Brody Zayn Preston Tobias Jude Cayden Cody Gavin Hayes Ronan
+Kaleb Rylan Marshall Lane Titus Ellis Cruz Nash Sean Jesse
+Fernando Emerson Manuel Ari Leonel Nasir Nicolas Kyler Sullivan Ruben
+Kaden Callum Abraham Bowen Zane Erick Jorge Alexis Rory Jax
+Warren Trevor Kaison Jonas Prince Oscar Louis Ricardo Edward Cristian
+Wade Hendrix Solomon Shane Killian Ismael Amari Odin Francisco Zaid
+Zander Arjun Josue Uriel Hayden Rocco Gideon Dallas Kane Colin
+Aidan Julius Tanner Ezequiel Cassius Bruce Alfredo Dominic Winston Sage
+Malcolm Otis Boone Judson Cyrus Andre Rhys Franklin Jayceon Leland
+Ali Roberto Eduardo Kason Raymond Garrett Anderson Reed Desmond Malik
+Sergio Curtis Trenton Devin Seth Spencer Chance Angelo Lawson Braylen
+Kade Jaxson Enrique Zayne Ryland Alonzo Nehemiah Rodrigo Talon Tate
+Corbin Skyler Fabian Byron Clark Marcos Damien Lennox Beckett Konrad
+Hector Frank Philip George Harrison Jared Ivan Keegan Colson Salvador
+Quinn Boston Kingsley Ronin Alexzander Braylon Wilder Zachariah Jeffrey Cade
+Deacon Jayson Jaden Marco Julio Armani Rafferty Emory Watson Duke
+Jimmy Roy Ralph Eugene Arnold Harold Howard Stanley Herbert Norman
+Leonard Clarence Walter Richard Robert Donald Gerald Larry Wayne Dennis
+Douglas Carl Terry Randy Keith Gregory Joe Willie Billy Bobby
+Jerry Alfred Russell Bruno Vance Vaughn Victor Vernon Virgil Wallace
+Ward Warner Wendell Wesson Weston Wilbur Wilson Wyatt Xavi Yosef
+Zaiden Zeke Zeph Abner Abram Ace Adan Addison Adonis Ahmad
+Ahmed Aiden Ainsley Alaric Albert Albie Alden Aldo Alec Alessandro
+Alexei Alfonso Algernon Allan Allen Almir Alonso Alvin Amare Amias
+Ambrose Amos Anders Ansel Anson Apollo Aquila Archer Archie Arden
+Ares Ari Ariel Arlin Armando Armani Arman Arnav Arrow Arturo
+Asa Ashton Aspen Athan Atticus Aubrey Augustine Augustus Aurelio Austen
+Avi Axton Ayaan Ayden Azariah Bailey Baker Baldwin Banks Barnaby
+Baron Barry Bartholomew Basil Baxter Bear Beauregard Bellamy Benedict Bennet
+Benicio Benito Benson Bentlee Bergen Bernard Bertram Bishop Bjorn Blaine
+Blaise Blaze Bo Boaz Bode Bodie Bond Boris Bowie Boyd
+Braden Bradford Brady Bram Branson Brant Braxton Brayan Brecken Brendan
+Brennan Brent Brett Brian Brice Bridger Briggs Brixton Brock Broderick
+Bronson Bruno Bryant Bryce Bryndon Buck Bud Burke Byrne Cael
+Cain Cairo Caius Calder Cale Callan Callen Calvin Camilo Campbell
+Canaan Cannon Canyon Caraway Carlo Carlos Carmelo Carmine Carsen Carver
+Case Casey Cash Cason Caspian Cassian Castiel Cato Cavan Cecil
+Cedar Cedric Cesar Chad Chandler Channing Charley Chase Chester Chevy
+Chris Cian Ciaran Cillian Clarke Claude Clay Clayton Clement Cleo
+Cliff Clifford Clifton Clint Clinton Clyde Cobain Coby Colby Cole
+Coleman Colter Conan Conley Conner Connor Conrad Constantine Cooper Corban
+Cordell Corey Cormac Cornelius Cortez Cory Coy Craig Crawford Creed
+Crew Crispin Crosby Cullen Cyprian Dade Dagen Dakari Dakota Dale
+Dallon Dalton Damon Dane Dangelo Danny Dante Darian Darien Dario
+Darius Darnell Darrell Darren Darryl Dashiell Davion Davis Dax Daxton
+Dayton Deandre Deangelo Declan Dedrick Deion Delaney Dell Delton Demetrius
+Dempsey Denver Derek Derrick Deshawn Desi Devan Dexter Diallo Dilan
+Dillon Dimitri Dion Dixon Dmitri Dominik Donovan Dorian Doyle Drake
+Draven Drew Dryden Dudley Duncan Dustin Dwayne Dwight Dylan Eamon
+Earl Easton Eden Edgar Edison Edmund Edrick Edson Edwin Efrain
+Egan Eitan Elan Elder Eldon Eli Elian Elijah Eliseo Elliott
+Ellsworth Elmer Elton Elvin Elvis Emeka Emil Emile Emilio Emir
+Emmanuel Emmet Emmitt Enoch Enrico Ephraim Erasmo Ernest Ernesto Errol
+Esteban Estevan Ethan Etienne Eugene Evander Everest Everly Ewan Ezio
+Fabio Falcon Farrell Federico Felipe Felix Fenn Fergus Fidel Fielding
+Finley Finn Finnegan Finnick Fisher Fitz Fletcher Flint Florian Floyd
+Ford Forest Forrest Foster Fox Francis Franco Frankie Frederick Fritz
+Gabe Gage Galen Gannon Gareth Garland Garner Garrison Garry Garth
+Gary Gaston Gatlin Gavriel Gene Genesis Gennaro Geoffrey Gerard Geronimo
+Gian Gianni Gibson Gil Gilbert Giles Gino Giovanni Giuseppe Glen
+Glenn Godfrey Gordon Grady Graeme Grant Granger Gray Grayden Greg
+Gregorio Grey Greysen Griffith Grover Gunner Gus Gustavo Guy Hades
+Hakeem Hal Halston Hamilton Hamza Hank Hansel Hardy Harlan Harley
+Harper Harrison Hart Harvey Hassan Hawk Hayes Heath Hector Helio
+Henley Herman Hezekiah Hiram Holden Hollis Homer Horace Houston Howell
+Hugh Hugo Humberto Hunter Hurley Huxley Hyde Ianto Ibrahim Idris
+Ignacio Igor Ike Iker Ilan Immanuel Indiana Ingram Irving Isaias
+Isidore Isaiah Ivan Ivor Izaiah Jabari Jace Jacen Jack Jackson
+Jacoby Jadiel Jaeger Jagger Jaiden Jaime Jair Jairo Jamal Jamari
+Jamie Jamison Jarrett Jarvis Jasiah Javier Javon Jaxton Jay Jaylen
+Jaylin Jazz Jean Jebediah Jed Jefferson Jenson Jeremias Jericho Jerome
+Jesiah Jett Joaquin Jock Joel Joey Johan Johnny Jonah Jones
+Jordy Jovanni Juan Juelz Jules Julien Junior Juniper Justice Kabir
+Kace Kade Kadeem Kai Kaiser Kalel Kalen Kallen Kamari Kamden
+Kane Kanye Karsten Kase Kasen Kash Kason Kavan Kayson Keanu
+Keaton Kellan Kellen Kelvin Kendrick Kenji Kenneth Kensington Kent Kenyon
+Kermit Kerry Khalid Khalil Kian Kieran Kilian Kimball Kip Kirby
+Kirk Kit Kobe Koda Kody Kohen Kolby Kole Kolton Konnor
+Korbin Kristian Kristopher Kurt Kylan Kyle Kyson Lachlan Lamar Lambert
+Lamont Lance Landen Landry Langston Larkin Lars Lawrence Layne Layton
+Lazarus Leandro Ledger Lee Legacy Leif Leighton Leland Lennon Lenny
+Leandro Leonardo Leonidas Leopold Leroy Levon Lewis Lex Liev Lionel
+Lloyd Loch Locke Logan Loki London Lonnie Loren Lorne Louie
+Lowell Luc Lucian Luciano Ludwig Luka Luther Lyle Lyndon Lyric
+Mac Macen Mack Maddox Madison Magnus Major Makai Malachy Malaki
+Mannix Manning Marcel Marcelo Marion Mario Mark Marley Marlon Marquis
+Marsden Martin Marvin Mason Massimo Mathew Mathias Matteo Maurice Mauricio
+Maxim Maximilian Maximo Maximus Maxton Maxwell Mayer Mekhi Melvin Memphis
+Merle Merlin Merrick Michael Miguel Mika Mikael Mikel Milan Miller
+Milton Misha Mitchell Moises Monroe Montgomery Monty Mordecai Morgan Morris
+Moses Muhammad Murphy Murray Musa Mylo Myron Nadir Namir Napoleon
+Nasir Nathanael Navid Neal Ned Neil Nelson Neo Nestor Neville
+Nikolai Nikolas Niko Nilo Noel Nolan Norris Nyle Oakes Oakley
+Obadiah Oberon Octavio Odell Odysseus Ogden Olaf Ollie Omar Omari
+Onyx Oren Orion Orlando Orson Osborn Oscar Osiris Osman Osvaldo
+Oswald Otho Owais Ozzy Pablo Paco Paden Palmer Paolo Paris
+Parrish Pascal Patton Paul Paulo Pax Paxton Payne Payton Pedro
+Percival Percy Perry Peyton Phelan Phillip Phineas Phoenix Pierce Pierre
+Piers Porter Powell Pranav Prescott Presley Preston Price Primo Prosper
+Quentin Quincy Quinlan Quinton Rafael Raiden Raine Rainier Raleigh Ramiro
+Ramon Ramsey Randall Ranger Rankin Ransom Raoul Raphael Rashad Raul
+Ravi Rawls Ray Rayan Rayden Rayne Reagan Reece Reeve Reginald
+Reign Remy Renato Rene Reuben Rex Rey Reyansh Reyes Rhett
+Rhodes Rian Ricky Rico Ridge Riggs Rio River Roan Roark
+Robin Rocky Roderick Rodney Rogelio Roger Rohan Roland Rolando Rollins
+Romeo Ronald Ronnie Rooney Roosevelt Rory Roscoe Ross Rowen Roy
+Royal Royce Ruben Rudy Rufus Rune Rupert Russ Ryan Ryder
+Ryker Ryland Sabastian Sage Saint Salem Salvatore Sam Samir Sampson
+Samson Sanders Sandro Santana Santiago Santino Santos Saul Saverio Sawyer
+Scott Seamus Sebastien Sedric Sergei Seth Seven Severin Seymour Shaun
+Shawn Sheldon Shepherd Sherman Sidney Silvio Simeon Sinclair Skye Slade
+Sloan Smith Solomon Sonny Soren Spencer Stefan Stellan Stephen Sterling
+Stetson Stone Storm Stuart Sullivan Sutton Sven Sylas Sylvester Tadeo
+Taj Talon Tanner Tarek Tariq Tate Tatum Taylor Ted Teddy
+Tenzin Terrance Terrell Terrence Tesla Thaddeus Thane Theo Theron Thiago
+Thor Thurston Tiago Tiberius Tilden Tillman Timber Tobias Toby Todd
+Tomas Tommy Tony Torin Trace Travis Tray Tremaine Trent Trevon
+Trey Tripp Tristan Troy True Truett Truman Tucker Turner Ty
+Tyrell Tyrone Tyson Ulises Ulysses Upton Uriah Urijah Valentin Valentino
+Van Vander Vaughn Vernon Vicente Victor Vidal Vince Vinny Virgil
+Vito Vivaan Vladimir Wade Walden Waldo Wallace Walsh Walton Warner
+Warrick Watson Waverly Wayland Waylen Webb Webster Weldon Wells Wendell
+Werner Whit Whitaker Wilder Wiley Wilhelm Will Willem Willis Winslow
+Winston Wolf Wolfgang Woodrow Worth Wren Wright Wyler Wynn Yahir
+Yandel Yehuda Yosef Yousef Yusuf Zachary Zaid Zaire Zakai Zamir
+Zander Zavier Zeb Zebedee Zed Zeke Zenon Zephyr Zeppelin Zeus
+Ziggy Zion Zwei Zyair Zyaire Ezra Amos Enzo Nico Rocco
+`;
+
+function parse(raw) {
+  const out = [];
+  const seen = new Set();
+  for (const tok of raw.trim().split(/\s+/)) {
+    const key = tok.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(tok);
+  }
+  return out;
+}
+
+const FEMALE = parse(FEMALE_RAW);
+const MALE = parse(MALE_RAW);
+
+// ── end src/names.js ──
+
+// Raw material the line engine works from: rhyme classes, a word list for
+// finding names hidden inside English words, and per-letter banks.
+
+// ---------------------------------------------------------------------------
+// RIME CLASSES
+// Ordered LONGEST SUFFIX FIRST — the engine takes the first match, so a specific
+// ending ("enelope") must sit above the general one ("ope"). A name that matches
+// nothing gets the "nothing rhymes with you" line, which is a good line, so gaps
+// here are cheap.
+// ---------------------------------------------------------------------------
+const RIMES = [
+  ['enelope', ['cantaloupe', 'antelope', 'envelope']],
+  ['ictoria', ['euphoria', 'Astoria']],
+  ['iffany', ['epiphany']],
+  ['ethany', ['epiphany']],
+  ['ichael', ['bicycle', 'recycle']],
+  ['abella', ['umbrella', 'acapella', 'Coachella']],
+  ['amilla', ['vanilla', 'chinchilla', 'flotilla']],
+  ['amila', ['vanilla', 'chinchilla', 'flotilla']],
+  ['arlett', ['starlet', 'scarlet fever']],
+  ['arlet', ['starlet']],
+  ['amuel', ['manual']],
+  ['aniel', ['spaniel']],
+  ['illow', ['pillow', 'armadillo']],
+  ['arper', ['sharper']],
+  ['iper', ['sniper', 'windshield wiper']],
+  ['ivia', ['trivia', 'Bolivia']],
+  ['ailey', ['daily', 'ukulele']],
+  ['aylee', ['daily', 'ukulele']],
+  ['ayley', ['daily', 'ukulele']],
+  ['aleigh', ['daily']],
+  ['aley', ['daily']],
+  ['iley', ['smiley', 'highly', 'wildly']],
+  ['ylie', ['smiley', 'highly']],
+  ['ryan', ['lion', 'iron', 'flyin’']],
+  ['ordan', ['warden', 'garden']],
+  ['organ', ['bourbon', 'a church organ']],
+  ['eagan', ['vegan', 'pagan']],
+  ['egan', ['vegan', 'pagan', 'began']],
+  ['ogan', ['slogan', 'began']],
+  ['andon', ['abandon', 'random']],
+  ['ustin', ['trustin’', 'adjustin’']],
+  ['unter', ['punter', 'blunter']],
+  ['arter', ['smarter', 'starter', 'charter']],
+  ['arker', ['darker', 'marker']],
+  ['eston', ['question', 'suggestion']],
+  ['ayden', ['maiden', 'shade in']],
+  ['aiden', ['maiden', 'shade in']],
+  ['aden', ['maiden', 'shade in']],
+  ['ason', ['chasin’', 'racin’', 'a basin']],
+  ['ummer', ['bummer', 'drummer', 'plumber']],
+  ['emma', ['a dilemma', 'a lemma']],
+  ['ema', ['a dilemma', 'the cinema']],
+  ['ella', ['umbrella', 'acapella', 'mozzarella']],
+  ['elle', ['carousel', 'caramel', 'clientele']],
+  ['annah', ['a bandanna', 'Havana', 'a cabana']],
+  ['anna', ['a bandanna', 'Havana', 'a cabana']],
+  ['ana', ['a banana', 'a cabana', 'Havana']],
+  ['issa', ['kiss ya', 'miss ya']],
+  ['essa', ['finesse', 'espresso']],
+  ['ina', ['a ballerina', 'an arena', 'a marina']],
+  ['ena', ['an arena', 'a hyena', 'a marina']],
+  ['ita', ['a margarita', 'a fajita']],
+  ['aya', ['papaya']],
+  ['aia', ['papaya']],
+  ['una', ['tuna', 'Fortuna']],
+  ['ova', ['a supernova', 'Casanova']],
+  ['ava', ['lava', 'guava', 'java']],
+  ['iara', ['a tiara', 'mascara']],
+  ['ara', ['mascara', 'the Sahara', 'a tiara']],
+  ['era', ['the Riviera', 'a chimera']],
+  ['ira', ['the Riviera']],
+  ['ora', ['a fedora', 'Pandora']],
+  ['uby', ['a newbie', 'Scooby']],
+  ['ucy', ['juicy', 'loosey-goosey']],
+  ['olly', ['jolly', 'a trolley', 'volleyball']],
+  ['illy', ['silly', 'chilly']],
+  ['mily', ['family']],
+  ['ily', ['silly', 'chilly']],
+  ['ellie', ['jelly', 'a deli']],
+  ['elly', ['jelly', 'a deli']],
+  ['osie', ['cozy', 'nosy']],
+  ['adie', ['a lady', 'shady']],
+  ['ady', ['a lady', 'shady']],
+  ['atie', ['weighty', 'lately']],
+  ['aty', ['weighty', 'lately']],
+  ['aisy', ['lazy', 'crazy', 'hazy']],
+  ['acy', ['spacey', 'lacy']],
+  ['arley', ['gnarly', 'barley']],
+  ['arlie', ['gnarly', 'barley']],
+  ['emi', ['dreamy', 'creamy']],
+  ['emy', ['dreamy', 'creamy']],
+  ['ophie', ['a trophy']],
+  ['oey', ['snowy', 'doughy']],
+  ['age', ['a stage', 'a page', 'backstage']],
+  ['ace', ['space', 'a place', 'embrace']],
+  ['ase', ['space', 'a place', 'embrace']],
+  ['ope', ['nope', 'a horoscope']],
+  ['ove', ['love', 'above', 'a glove']],
+  ['ade', ['lemonade', 'a serenade', 'a parade']],
+  ['ary', ['a canary', 'contrary', 'necessary']],
+  ['ica', ['a harmonica', 'a replica']],
+  ['ika', ['a harmonica', 'a replica']],
+  ['oria', ['euphoria', 'Astoria']],
+  ['uinn', ['a win', 'a twin', 'a penguin']],
+  ['inn', ['a win', 'a twin', 'a penguin']],
+  ['lynn', ['a violin', 'penicillin']],
+  ['lyn', ['a violin', 'penicillin']],
+  ['ette', ['a baguette', 'a silhouette', 'roulette']],
+  ['aine', ['champagne', 'an airplane', 'a hurricane']],
+  ['ane', ['champagne', 'an airplane', 'a hurricane']],
+  ['een', ['caffeine', 'serene', 'a routine']],
+  ['ene', ['caffeine', 'serene', 'a routine']],
+  ['line', ['a valentine', 'a punchline', 'the borderline']],
+  ['ames', ['games', 'flames', 'claims']],
+  ['iver', ['a shiver', 'deliver', 'a quiver']],
+  ['ucas', ['hocus pocus']],
+  ['yatt', ['a riot', 'quiet', 'a diet']],
+  ['oah', ['quinoa', 'Samoa', 'a boa']],
+  ['ack', ['a snack', 'a track', 'attack']],
+  ['ax', ['snacks', 'tracks', 'relax']],
+  ['ateo', ['a rodeo', 'a video']],
+  ['eo', ['a rodeo', 'a video']],
+  ['evi', ['a high-five', 'a drive-by']],
+  ['uke', ['a fluke', 'rebuke']],
+  ['iah', ['a pariah', 'a messiah']],
+  ['ia', ['see ya', 'IKEA', 'Korea']],
+  ['eah', ['see ya', 'IKEA']],
+];
+
+// Names whose suffix match would produce a bad rhyme. Landing here is not a
+// failure — it routes the name to the "nothing rhymes with you" line instead,
+// which tests better than a forced rhyme anyway.
+const NO_RHYME = new Set([
+  'ivy', 'sophia', 'sofia', 'ian', 'jasmine', 'orange', 'silver', 'purple',
+  'month', 'morgan', 'autumn', 'olive', 'iris', 'pearl', 'wren',
+  'faith', 'hazel', 'skye',
+]);
+
+// ---------------------------------------------------------------------------
+// WORD LIST for hidden-name detection.
+// The engine looks for a name sitting INSIDE one of these words ("Ella" inside
+// "umbrella"). Chosen for being fun to point at, not for dictionary coverage —
+// a boring hit is worse than no hit.
+// ---------------------------------------------------------------------------
+const FUN_WORDS = `
+avalanche available javelin lavender lava guava java cassava behaviour
+umbrella acapella patella novella cinderella mozzarella salmonella
+dilemma lemma gemma cinema enema
+bandanna savannah hosanna banana cabana panorama analysis manager banner
+amiable amiably
+lunar lunatic
+renovate innovation supernova
+disgrace graceful gracious
+primrose morose prose arose rosemary rosewood
+skateboard skate
+coral decorate decorative memorable corridor
+honorary honorable
+declaration declare
+adamant adage
+channel planner manner scanner annual annals
+truth ruthless
+faithful faithfully
+hopeful hopeless
+enjoy joyful killjoy joyous
+message passage sausage massage sabotage
+skyline skyscraper
+wrench wrenching
+jaded unjaded
+chamber chambered
+angelic evangelist
+harmonious harmonica
+realization civilization organization visualization
+familiar peculiar reliable australia
+similar similarly
+visa artisan
+safari primary summary temporary rosemary
+constellation
+levitate levitation
+brilliant guardian median italian comedian obsidian
+william
+delicious believe relief delightful elite delicate elimination
+napoleon chameleon leopard
+theory theatre theatrical
+washer washing
+jackpot blackjack hijack
+lukewarm fluke
+maximum maximize
+benefit benevolent
+sample sesame samples
+quinoa
+hocus focus
+spaniel
+bicycle recycle
+manual manually
+smarter starter charter
+abandon abandoned
+imagination original originally
+array betray portray
+elevate unbelievable believable
+mascara caramel caravan
+trivia trivial
+vanilla gorilla chinchilla flotilla guerrilla
+autumnal
+melodic melodrama
+serenade serendipity serene
+destined destination
+alliance appliance
+compliance
+adventure venture
+paradise
+canyon
+diamond
+harmony
+victory victorious
+notorious hilarious mysterious curious furious
+aquarium planetarium auditorium
+sanctuary dictionary imaginary extraordinary
+experiment achievement commitment appointment
+department apartment compartment
+alphabet trumpet magnet
+kindness kindred
+january february
+teacher preacher feature creature
+peaceful peace
+average beverage leverage
+sabbatical fanatical
+statistics logistics
+mathematics dramatics
+pyjamas bananas
+karaoke
+avocado tornado desperado
+volcano piano
+oregano
+espresso
+tiramisu
+spaghetti confetti
+broccoli
+zucchini martini bikini houdini
+biscotti
+macaroni
+pepperoni
+minestrone
+provolone
+telephone
+microphone
+saxophone
+xylophone
+marathon
+paragon
+octagon
+hexagon
+polygon
+cardigan
+hooligan
+mulligan
+ptarmigan
+oxygen
+nitrogen
+hydrogen
+allergen
+margarine
+tangerine
+submarine
+clementine
+turpentine
+valentine
+serpentine
+quarantine
+gasoline
+vaseline
+mandolin
+javelin
+gremlin
+franklin
+penicillin
+violin
+insulin
+muslin
+marlin
+merlin
+goblin
+dublin
+poplin
+bulletin
+gelatin
+satin
+platinum
+laminate
+dominate
+nominate
+illuminate
+eliminate
+terminate
+alternate
+carbonate
+chocolate
+pomegranate
+delicatessen
+delegate
+elegant
+elephant
+relevant
+brilliant
+defiant
+radiant
+lenient
+convenient
+ingredient
+obedient
+expedient
+recipient
+sufficient
+efficient
+ancient
+patient
+impatient
+transient
+conscience
+experience
+audience
+resilience
+brilliance
+appliance
+compliance
+reliance
+alliance
+variance
+clearance
+insurance
+endurance
+assurance
+performance
+romance
+finance
+nuisance
+abundance
+`.trim().split(/\s+/);
+
+// A hit on one of these reads as an insult, so the engine never uses them for
+// a "your name is hiding in this word" line.
+const HIDDEN_BLOCKLIST = new Set([
+  'disgrace', 'morose', 'nuisance', 'killjoy', 'hopeless', 'ruthless',
+  'salmonella', 'enema', 'sabotage', 'lunatic', 'goblin', 'gremlin',
+  'hooligan', 'betray', 'abandon', 'abandoned', 'impatient', 'allergen',
+  'desperado', 'tornado', 'volcano', 'furious', 'notorious', 'melodrama',
+]);
+
+// ---------------------------------------------------------------------------
+// PER-LETTER BANKS
+// Both halves of an alliteration pair must start with the letter, and both must
+// be a trait somebody would happily cop to. "Which am I dealing with" only works
+// if either answer is fun to claim.
+// ---------------------------------------------------------------------------
+const ALLITERATION = {
+  a: ['aggressively punctual', 'allergic to plans'],
+  b: ['brutally honest', 'bad at texting first'],
+  c: ['chaotically fun', 'careful with your words'],
+  d: ['dangerously competitive', 'down for absolutely anything'],
+  e: ['extremely online', 'elegantly unbothered'],
+  f: ['funnier than you let on', 'fiercely loyal'],
+  g: ['great at comebacks', 'genuinely terrible at directions'],
+  h: ['hilarious in group chats', 'hard to impress'],
+  i: ['incredibly stubborn', 'impossible to surprise'],
+  j: ['just a little chaotic', 'judgmental about music'],
+  k: ['kinder than you admit', 'keeping receipts on everyone'],
+  l: ['low-key competitive', 'loud in the car'],
+  m: ['mildly feral on weekends', 'meticulous about playlists'],
+  n: ['never on time', 'nicer than your texts suggest'],
+  o: ['obsessed with one specific show', 'outrageously picky about coffee'],
+  p: ['particular about restaurants', 'pretending to be chill'],
+  q: ['quietly hilarious', 'quick to argue about pizza'],
+  r: ['ridiculously competitive', 'relentlessly kind'],
+  s: ['secretly competitive', 'sarcastic before noon'],
+  t: ['terrible at small talk', 'tragically loyal to one coffee order'],
+  u: ['unreasonably good at trivia', 'up way too late'],
+  v: ['very attached to your routine', 'voted most likely to overpack'],
+  w: ['witty and fully aware of it', 'way too invested in your playlist'],
+  x: ['excellent at trivia nobody asked for', 'exactly as fun as your name suggests'],
+  y: ['young at heart about one specific thing', 'yelling at the TV during sports'],
+  z: ['zero chill about your favourite show', 'zealous about breakfast food'],
+};
+
+const ACROSTIC = {
+  a: 'actually funny',
+  b: 'better taste than me',
+  c: 'chronically curious',
+  d: 'dangerously charming',
+  e: 'excellent taste in something, I can tell',
+  f: 'funny first, everything else second',
+  g: 'good listener, probably',
+  h: 'hard to forget',
+  i: 'impossible to categorise',
+  j: 'just my kind of trouble',
+  k: 'kind, obviously',
+  l: 'a little bit chaotic',
+  m: 'a menace, complimentary',
+  n: 'no notes',
+  o: 'objectively cool',
+  p: 'probably competitive',
+  q: 'quick-witted',
+  r: 'ridiculously easy to talk to',
+  s: 'somehow already interesting',
+  t: 'terrifyingly cool',
+  u: 'unreasonably charming',
+  v: 'very much my problem now',
+  w: 'worth the effort',
+  x: 'the x-factor, whatever that is',
+  y: 'a yes to most adventures',
+  z: 'zero notes',
+};
+
+// ---------------------------------------------------------------------------
+// UNIVERSAL LINES — work for any name, no hooks required. These carry the names
+// the engine knows nothing about, and they double as the low-cheese ballast that
+// keeps a set of ten from being ten puns in a row.
+// ---------------------------------------------------------------------------
+const UNIVERSAL = [
+  { t: 'Draft one was a pun on your name. Draft two was a worse pun on your name. This is draft three: hi, {name}.', c: 'playful', cheese: 1 },
+  { t: '{name} is a genuinely fun name to say out loud. I know this because I just said it out loud, twice, alone, like a completely normal person.', c: 'playful', cheese: 2 },
+  { t: 'Okay {name}, I’m going to guess three things about you and you tell me how many I got. 1) You have a very specific coffee order. 2) You’ve rewatched a comfort show this month. 3) You’re funnier over text than you let on.', c: 'question', cheese: 1 },
+  { t: 'Spellcheck keeps underlining your name in red and honestly it should be the other way around — the dictionary is the one that’s wrong here.', c: 'playful', cheese: 2 },
+  { t: '{name} — {letters} letters, and I’ve typed and deleted them roughly forty times. Let’s call this the version that got through.', c: 'sincere', cheese: 1 },
+  { t: 'I had two options here, {name}: something clever, or something honest. Went with honest — your profile made me laugh and I wanted to say so.', c: 'sincere', cheese: 0 },
+  { t: 'Serious question, {name}: are you the kind of person who replies within four minutes or within four business days? I need to manage my expectations.', c: 'question', cheese: 1 },
+  { t: '{name}, I’m told the trick is asking a real question, so: what’s the best thing you ate this week? I’m collecting recommendations and also stalling.', c: 'question', cheese: 0 },
+  { t: 'Hi {name}. No line, no bit, no wordplay. Just a person who read your profile twice and decided it was worth saying something.', c: 'sincere', cheese: 0 },
+  { t: 'I’m going to be honest, {name} — I opened this app to kill ten minutes and now I’m carefully editing a message. That’s on you.', c: 'sincere', cheese: 1 },
+  { t: '{name}, pick one and I’ll build the whole first date around it: a bakery, a bookshop, or a place with a truly unhinged happy hour.', c: 'question', cheese: 1 },
+  { t: 'Right, {name} — most important question first, and there’s no wrong answer, but there is definitely a wrong answer: is a hot dog a sandwich?', c: 'question', cheese: 2 },
+];
+
+// Rank-aware lines. Popularity is real data we happen to have, so it may as well
+// do some work.
+const RANK_LINES = {
+  common: [
+    { t: '{name} is somewhere around the #{rank} most popular {kind} name in America, so statistically I’ve met a few. Statistically, none of them have made me rewrite a message this many times.', c: 'data', cheese: 1 },
+    { t: 'There are a lot of {name}s out there. There is exactly one of them I’ve typed a message to this week, and I’d like the record to show it’s going well so far.', c: 'data', cheese: 1 },
+  ],
+  mid: [
+    { t: '{name} sits around #{rank} on the popularity list, which I’ve decided is the perfect spot: common enough that I can spell it, rare enough that I’ll remember it.', c: 'data', cheese: 1 },
+  ],
+  rare: [
+    { t: '{name} is only about the #{rank} most popular name in the country, which is my favourite kind of rare — not so unusual it becomes the whole conversation, unusual enough that I’ll remember exactly where I heard it.', c: 'data', cheese: 1 },
+  ],
+};
+
+// ── end src/lexicon.js ──
+
+// Per-name knowledge: what the name means, what it gets shortened to, and how
+// else it gets spelled. Curated for the names people actually look up — a name
+// missing from all three still gets eight to ten lines from the computable
+// families, so gaps degrade quietly.
+
+// name -> meaning, phrased to drop straight into: 'X means "…"'
+const MEANINGS = {
+  olivia: 'olive tree — as in the peace offering',
+  emma: 'whole, or universal',
+  charlotte: 'free',
+  amelia: 'hard-working',
+  sophia: 'wisdom',
+  sofia: 'wisdom',
+  isabella: 'devoted to God',
+  isabel: 'devoted to God',
+  ava: 'life',
+  mia: 'mine, in Italian',
+  evelyn: 'wished-for child',
+  luna: 'the moon',
+  harper: 'someone who plays the harp',
+  camila: 'attendant at a ceremony',
+  scarlett: 'someone who sold bright red cloth',
+  elizabeth: 'my God is abundance',
+  eleanor: 'shining light',
+  emily: 'rival, or eager',
+  chloe: 'blooming',
+  mila: 'gracious, or dear',
+  violet: 'the flower — and the colour',
+  penelope: 'weaver',
+  aria: 'a solo in an opera',
+  abigail: 'my father’s joy',
+  ella: 'all, or fairy maiden',
+  avery: 'ruler of elves',
+  hazel: 'the tree, and the eye colour',
+  nora: 'light, or honour',
+  layla: 'night',
+  lily: 'purity — the flower',
+  aurora: 'dawn',
+  nova: 'a star that suddenly gets much brighter',
+  madison: 'son of Maud, which nobody expected to become a girls’ name and yet',
+  grace: 'grace — the actual, literal quality',
+  isla: 'island',
+  willow: 'the tree that bends instead of breaking',
+  zoe: 'life',
+  riley: 'valiant, or courageous',
+  stella: 'star',
+  ivy: 'faithfulness — the plant that holds on',
+  victoria: 'victory',
+  naomi: 'pleasantness',
+  hannah: 'grace, or favour',
+  lucy: 'light',
+  elena: 'bright, shining one',
+  maya: 'illusion, in Sanskrit — and water, in Hebrew',
+  leah: 'weary, which is unfair, so let’s go with the other reading: delicate',
+  natalie: 'born on Christmas Day',
+  valentina: 'strong, healthy — same root as valentine',
+  ruby: 'the gemstone, obviously',
+  alice: 'noble',
+  autumn: 'the season',
+  bella: 'beautiful, in Italian',
+  athena: 'the goddess of wisdom and war, so, both',
+  clara: 'clear, or bright',
+  savannah: 'a treeless plain',
+  audrey: 'noble strength',
+  iris: 'rainbow',
+  caroline: 'free woman',
+  quinn: 'wise, or counsel',
+  piper: 'someone who plays the pipe',
+  cora: 'maiden',
+  vivian: 'alive',
+  melody: 'a melody, which is exactly what it sounds like',
+  anna: 'grace',
+  sarah: 'princess',
+  jade: 'the stone — said to protect the person wearing it',
+  rose: 'the flower, and nothing more complicated than that',
+  ada: 'noble',
+  daisy: 'day’s eye, because it opens at dawn',
+  faith: 'faith — no translation required',
+  ruth: 'companion, or friend',
+  summer: 'the season',
+  juniper: 'the berry that makes gin taste like gin',
+  georgia: 'farmer, or worker of the earth',
+  margaret: 'pearl',
+  mary: 'beloved, or bitter, depending on who you ask',
+  jasmine: 'the flower — a gift from Persian',
+  zara: 'blooming flower, or princess',
+  wren: 'the small, extremely loud bird',
+  valerie: 'strong',
+  esther: 'star',
+  camille: 'attendant at a ceremony',
+  sage: 'wise — and also the herb',
+  diana: 'divine, and goddess of the hunt',
+  michelle: 'who is like God',
+  ophelia: 'help',
+  nina: 'little girl, in Spanish',
+  harmony: 'harmony — the musical kind',
+  cecilia: 'blind, historically, though the patron saint of music got the name',
+  ariel: 'lion of God',
+  alexandra: 'defender of people',
+  maeve: 'she who intoxicates — she was an Irish warrior queen',
+  rachel: 'ewe, which sounds better in Hebrew',
+  amber: 'fossilised tree resin — the stuff they got the dinosaur DNA from',
+  jane: 'God is gracious',
+  fiona: 'fair, or white',
+  phoebe: 'radiant, or bright',
+  gemma: 'gem, in Italian',
+  miranda: 'worthy of admiration',
+  rosemary: 'dew of the sea — and yes, the herb',
+  amanda: 'worthy of being loved',
+  laura: 'laurel — the victory crown',
+  bianca: 'white',
+  sabrina: 'from the River Severn',
+  veronica: 'true image',
+  paige: 'a young attendant — or, you know, a page',
+  ember: 'the part of a fire still going after everyone’s gone to bed',
+  holly: 'the plant that stays green through the winter',
+  bethany: 'house of figs',
+  daphne: 'laurel tree',
+  faye: 'fairy',
+  felicity: 'happiness',
+  helen: 'torch, or shining light',
+  jessica: 'foresight — Shakespeare coined it for The Merchant of Venice',
+  madeline: 'from Magdala — and yes, also the cookie',
+  serena: 'calm, serene',
+  vanessa: 'nothing at all — Jonathan Swift invented it for a poem',
+  beatrice: 'she who brings happiness',
+  claire: 'clear, bright',
+  eliza: 'my God is abundance',
+  esme: 'esteemed, or loved',
+  eve: 'life, and also the beginning of everything',
+  freya: 'lady — the Norse goddess of love and war',
+  hope: 'hope',
+  joy: 'joy',
+  lorelei: 'the siren on the rock in the Rhine',
+  lyra: 'lyre — and a constellation',
+  mabel: 'lovable',
+  nadia: 'hope',
+  olive: 'the olive — the peace one',
+  paloma: 'dove, in Spanish',
+  pearl: 'the pearl',
+  penny: 'a weaver, via Penelope',
+  persephone: 'the goddess who runs the underworld half the year',
+  poppy: 'the flower of remembrance',
+  raven: 'the bird, and the Poe of it all',
+  selena: 'the moon, via the Greek goddess Selene',
+  seraphina: 'fiery — the highest order of angels',
+  sylvie: 'of the forest',
+  thea: 'goddess, or gift of God',
+  vera: 'truth',
+  zuri: 'beautiful, in Swahili',
+  leilani: 'heavenly flowers',
+  liliana: 'lily',
+  genevieve: 'tribe woman, or white wave',
+  cordelia: 'heart',
+  matilda: 'mighty in battle',
+  imogen: 'maiden — a typo in a Shakespeare manuscript that stuck',
+  ingrid: 'beautiful, and beloved of Ing',
+  astrid: 'divinely beautiful',
+  giselle: 'pledge',
+  delilah: 'delicate',
+  adeline: 'noble',
+  josephine: 'God will add',
+  juliet: 'youthful',
+  juliette: 'youthful',
+  julia: 'youthful',
+  katherine: 'pure',
+  kate: 'pure',
+  katie: 'pure',
+  kayla: 'slender, or pure',
+  leilany: 'heavenly flowers',
+  liam: 'resolute protection — it’s the tail end of William',
+  noah: 'rest, or comfort',
+  oliver: 'olive tree',
+  james: 'supplanter — the one who takes the place',
+  elijah: 'my God is the Lord',
+  mateo: 'gift of God',
+  theodore: 'gift of God',
+  henry: 'ruler of the home',
+  lucas: 'bringer of light',
+  william: 'resolute protection',
+  benjamin: 'son of the right hand',
+  levi: 'joined, or attached',
+  sebastian: 'venerable',
+  jack: 'God is gracious',
+  ezra: 'help',
+  michael: 'who is like God',
+  daniel: 'God is my judge',
+  leo: 'lion',
+  owen: 'noble, or young warrior',
+  samuel: 'God has heard',
+  asher: 'happy, or blessed',
+  ethan: 'strong, enduring',
+  wyatt: 'brave in war',
+  max: 'greatest',
+  felix: 'lucky, happy',
+  atlas: 'the one holding up the sky',
+  miles: 'soldier — or a unit of distance, take your pick',
+  jude: 'praised',
+  finn: 'fair, or white',
+  milo: 'soldier, or merciful',
+  kai: 'sea, in Hawaiian',
+  orion: 'the hunter — and the constellation',
+  arthur: 'bear',
+  isaac: 'he will laugh',
+  julian: 'youthful',
+  simon: 'he has heard',
+  nathan: 'given',
+  caleb: 'wholehearted — or, less flatteringly, dog',
+  adrian: 'from the Adriatic',
+  xavier: 'the new house',
+  roman: 'a citizen of Rome',
+  silas: 'of the forest',
+  jasper: 'treasurer — and a stone',
+  arlo: 'fortified hill',
+  dean: 'valley',
+  otto: 'wealth',
+  gabriel: 'God is my strength',
+  raphael: 'God has healed',
+  vincent: 'conquering',
+  victor: 'winner, which is a lot of pressure',
+  august: 'great, venerable',
+  cyrus: 'sun',
+  phoenix: 'the bird that gets a second go',
+};
+
+// name -> the short form people actually use
+const NICKNAMES = {
+  elizabeth: 'Liz', alexandra: 'Alex', alexandria: 'Alex', samantha: 'Sam',
+  katherine: 'Kate', kathryn: 'Kate', katelyn: 'Katie', kaitlyn: 'Katie',
+  victoria: 'Vic', gabriella: 'Gabby', gabrielle: 'Gabby', isabella: 'Bella',
+  isabelle: 'Belle', penelope: 'Penny', josephine: 'Josie', margaret: 'Maggie',
+  madeline: 'Maddie', madelyn: 'Maddie', madison: 'Maddie', natalie: 'Nat',
+  vanessa: 'Nessa', jessica: 'Jess', jennifer: 'Jen', rebecca: 'Becca',
+  stephanie: 'Steph', michelle: 'Shelly', charlotte: 'Charlie',
+  eleanor: 'Nell', evangeline: 'Evie', evelyn: 'Evie', genevieve: 'Vivi',
+  anastasia: 'Ana', alexandrea: 'Lexi', alexis: 'Lex', amanda: 'Mandy',
+  cassandra: 'Cass', danielle: 'Dani', felicity: 'Fliss', georgia: 'George',
+  gwendolyn: 'Gwen', harriet: 'Hattie', imogen: 'Immy', josephina: 'Josie',
+  juliana: 'Jules', julianna: 'Jules', juliet: 'Jules', lillian: 'Lily',
+  matilda: 'Tilly', melissa: 'Mel', miranda: 'Randa', olivia: 'Liv',
+  patricia: 'Trish', priscilla: 'Cilla', rosalie: 'Rosie', rosemary: 'Rosie',
+  seraphina: 'Sera', theodora: 'Teddy', valentina: 'Val', valerie: 'Val',
+  veronica: 'Ronnie', vivienne: 'Viv', winifred: 'Winnie', persephone: 'Percy',
+  clementine: 'Clem', wilhelmina: 'Billie', philippa: 'Pippa',
+  benjamin: 'Ben', theodore: 'Teddy', alexander: 'Alex', nicholas: 'Nick',
+  christopher: 'Chris', jonathan: 'Jon', nathaniel: 'Nate', sebastian: 'Seb',
+  maximilian: 'Max', zachary: 'Zach', matthew: 'Matt', timothy: 'Tim',
+  anthony: 'Tony', gregory: 'Greg', jeremiah: 'Jerry', bartholomew: 'Bart',
+  frederick: 'Freddie', josiah: 'Joe', dominic: 'Dom', raphael: 'Raph',
+  augustus: 'Gus', montgomery: 'Monty', reginald: 'Reggie', jefferson: 'Jeff',
+};
+
+// Spelling clusters — every name in a cluster points at the others.
+const VARIANT_CLUSTERS = [
+  ['Sophia', 'Sofia'], ['Zoe', 'Zoey', 'Zoie'], ['Katie', 'Katy', 'Kaitie'],
+  ['Kaitlyn', 'Katelyn', 'Caitlin', 'Katelynn'], ['Hailey', 'Haley', 'Haylee', 'Hayley'],
+  ['Kaylee', 'Kayleigh', 'Kaleigh', 'Kailey'], ['Aaliyah', 'Aliyah', 'Aliya'],
+  ['Isabel', 'Isabelle', 'Isobel'], ['Madeline', 'Madelyn', 'Madilyn', 'Madeleine'],
+  ['Mackenzie', 'Makenzie', 'Mckenzie'], ['Riley', 'Rylee', 'Ryleigh', 'Rylie'],
+  ['Ashley', 'Ashlee', 'Ashleigh'], ['Sara', 'Sarah'], ['Ana', 'Anna'],
+  ['Alaina', 'Alayna', 'Elena', 'Alana'], ['Aubrey', 'Aubree', 'Aubrie'],
+  ['Adeline', 'Adelyn', 'Adalynn', 'Adalyn'], ['Emily', 'Emilee', 'Emilie'],
+  ['Layla', 'Laila', 'Leila', 'Laylah'], ['Norah', 'Nora'], ['Lily', 'Lilly', 'Lillie'],
+  ['Skylar', 'Skyler', 'Schuyler'], ['Peyton', 'Payton'], ['Reagan', 'Regan', 'Raegan'],
+  ['Cora', 'Kora'], ['Chloe', 'Khloe'], ['Marley', 'Marlee', 'Marleigh'],
+  ['Brooklyn', 'Brooklynn'], ['Kimberly', 'Kimberley'], ['Alison', 'Allison', 'Allyson'],
+  ['Kaia', 'Kaya'], ['Rachel', 'Rachael'], ['Jasmine', 'Jazmin', 'Jasmin'],
+  ['Elliot', 'Elliott'], ['Aiden', 'Ayden', 'Aidan'], ['Jayden', 'Jaden', 'Jaiden'],
+  ['Cayden', 'Kayden', 'Caden', 'Kaden'], ['Zachary', 'Zackary'], ['Sean', 'Shawn', 'Shaun'],
+  ['Eric', 'Erick', 'Erik'], ['Bryan', 'Brian'], ['Jeffrey', 'Geoffrey'],
+  ['Mark', 'Marc'], ['Stephen', 'Steven'], ['Phillip', 'Philip'], ['Karter', 'Carter'],
+  ['Kaleb', 'Caleb'], ['Nicolas', 'Nicholas'], ['Tristan', 'Tristen'],
+];
+
+// Which computed family each gem displaces, in gem order.
+//
+// A hand-written line about Quinn rhyming with "win" and the generated line
+// about Quinn rhyming with "win" are the same joke told twice. Tagging the gem
+// with 'rhyme' makes it claim that family's single slot; because gems sort
+// first, the good version wins and the generic one never appears. 'gem' means
+// "displaces nothing" — the line says something no family would have said.
+const GEM_CLAIMS = {
+  olivia: ['gem', 'meaning'], emma: ['hidden'], ella: ['hidden', 'gem'],
+  sophia: ['meaning'], sofia: ['meaning'], mia: ['meaning'], chloe: ['meaning'],
+  grace: ['meaning'], victoria: ['meaning'], natalie: ['meaning'], ruby: ['meaning'],
+  autumn: ['meaning'], athena: ['meaning'], iris: ['meaning'], melody: ['meaning'],
+  rose: ['meaning'], faith: ['meaning'], juniper: ['meaning'], wren: ['meaning'],
+  amber: ['meaning'], gemma: ['meaning'], amanda: ['meaning'], paige: ['meaning'],
+  ember: ['meaning'], jessica: ['meaning'], serena: ['meaning'], vanessa: ['meaning'],
+  claire: ['meaning'], freya: ['meaning'], lorelei: ['meaning'], paloma: ['meaning'],
+  persephone: ['meaning'], river: ['meaning'], vera: ['meaning'], felicity: ['meaning'],
+  liam: ['meaning'], atlas: ['meaning'], leo: ['meaning'], max: ['meaning'],
+  lucy: ['meaning'], nova: ['meaning'], aurora: ['meaning'], abigail: ['meaning'],
+  aria: ['meaning'], isla: ['meaning'], savannah: ['meaning'], piper: ['meaning'],
+  jasmine: ['meaning'],
+  sage: ['hidden'], joy: ['hidden'], ruth: ['hidden'], valentina: ['hidden'],
+  ava: ['hidden'], stella: ['gem', 'hidden'],
+  quinn: ['rhyme'], ivy: ['rhyme'], hope: ['rhyme'], summer: ['rhyme'],
+  emily: ['rhyme'], camila: ['rhyme'], luna: ['rhyme'], willow: ['rhyme'],
+  riley: ['rhyme'], molly: ['rhyme'], jade: ['rhyme'], daisy: ['rhyme'],
+  sabrina: ['rhyme'], veronica: ['rhyme'], katie: ['rhyme'], wyatt: ['rhyme'],
+  penelope: ['rhyme', 'gem'],
+  hannah: ['shape'], anna: ['shape'], otto: ['shape'],
+  elizabeth: ['nickname'],
+};
+
+// The hand-written ones. A gem beats anything the engine can assemble, so these
+// are ranked first whenever a name has them.
+const GEMS = {
+  olivia: [
+    { t: 'Olivia, you are one letter away from “oblivia” and two letters into “trivia,” which I’m taking as proof that you either know everything or forget everything. Which is it?', c: 'wordplay', cheese: 3 },
+    { t: 'Olivia means “olive tree,” which is technically a peace offering, so consider this message an official one.', c: 'wordplay', cheese: 2 },
+  ],
+  emma: [
+    { t: 'Emma, I have a dilemma — and yes, I noticed your name sitting right in the middle of that word. The dilemma is that I had exactly one good opening line and I just spent it.', c: 'pun', cheese: 3 },
+  ],
+  charlotte: [
+    { t: 'Charlotte — as in the web, as in I’m caught. That’s the whole line. I have nothing else prepared.', c: 'pun', cheese: 3 },
+  ],
+  amelia: [
+    { t: 'Amelia, I told myself I wasn’t going to make the Earhart joke. I’m going to make the Earhart joke. Please don’t disappear on me.', c: 'playful', cheese: 3 },
+  ],
+  sophia: [
+    { t: 'Sophia means “wisdom.” It took none of it to message you and it’s going to take all of it to keep this conversation good.', c: 'wordplay', cheese: 2 },
+  ],
+  sofia: [
+    { t: 'Sofia means “wisdom.” It took none of it to message you and it’s going to take all of it to keep this conversation good.', c: 'wordplay', cheese: 2 },
+  ],
+  isabella: [
+    { t: 'Isabella — there’s an entire “Bella” in there, plus an “is a” right in front of it. Your name is grammatically already a compliment and I’m just the one pointing it out.', c: 'wordplay', cheese: 3 },
+  ],
+  ava: [
+    { t: 'Ava, your name is hiding at the front of “avalanche” and “available,” which is either a warning or an invitation. I’m choosing to read both optimistically.', c: 'wordplay', cheese: 3 },
+  ],
+  mia: [
+    { t: 'Mia means “mine” in Italian, which is an enormous amount of pressure to put on a stranger, so I’ll start much smaller: hi, how’s your week going?', c: 'wordplay', cheese: 2 },
+  ],
+  evelyn: [
+    { t: 'Evelyn is Eve plus a bit extra, which technically makes you the original with an upgrade already installed.', c: 'wordplay', cheese: 3 },
+  ],
+  luna: [
+    { t: 'Luna, your name is the moon and it rhymes with tuna, and I’ve been staring at that gap between the sublime and the ridiculous for ten minutes now.', c: 'pun', cheese: 3 },
+  ],
+  harper: [
+    { t: 'Harper — as in Lee, which means I’ve already decided you’re the one who actually finishes books and I’m the one who says “I’ll get to it.”', c: 'playful', cheese: 2 },
+  ],
+  camila: [
+    { t: 'Camila rhymes with vanilla, which is the single least accurate rhyme I’ve ever been handed. Starting over: hi, I liked your profile.', c: 'pun', cheese: 3 },
+  ],
+  scarlett: [
+    { t: 'Scarlett, I had a Gone With the Wind line all ready and then remembered how that one ends. Fresh start: what’s the best thing you did this weekend?', c: 'playful', cheese: 2 },
+  ],
+  elizabeth: [
+    { t: 'Elizabeth comes with about nine nicknames pre-installed — Liz, Beth, Eliza, Ellie, Betty, Bess. You’re less a name and more a starter pack. Which one do I get?', c: 'question', cheese: 2 },
+  ],
+  emily: [
+    { t: 'Emily rhymes with “family,” which is moving considerably faster than I intended for a first message. Let me walk that back and just say hi.', c: 'pun', cheese: 3 },
+  ],
+  chloe: [
+    { t: 'Chloe means “blooming.” So scientifically you’re the spring update and I’m still running the winter version.', c: 'wordplay', cheese: 3 },
+  ],
+  violet: [
+    { t: 'Violet is exactly one letter away from Violent, and I’d like to establish which one I’m dealing with before I get emotionally invested.', c: 'wordplay', cheese: 3 },
+  ],
+  penelope: [
+    { t: 'Penelope rhymes with cantaloupe, antelope and envelope, and I’ve spent a genuinely embarrassing amount of time confirming that. Your name did this to me.', c: 'pun', cheese: 3 },
+    { t: 'Penelope waited twenty years in the Odyssey. I’m hoping for a reply in under twenty minutes, but I want you to know I respect the precedent.', c: 'wordplay', cheese: 2 },
+  ],
+  aria: [
+    { t: 'Aria is a solo in an opera, which explains a lot about why I’ve been rehearsing this message alone in my kitchen.', c: 'wordplay', cheese: 2 },
+  ],
+  abigail: [
+    { t: 'Abigail means “my father’s joy,” which is lovely and also means I’m now competing with your dad for the title. I like my chances less than I did a second ago.', c: 'wordplay', cheese: 2 },
+  ],
+  ella: [
+    { t: 'Bad news, Ella: I now read “umbr-Ella” instead of umbrella, and there’s no going back. Your name has cost me one perfectly good word.', c: 'pun', cheese: 3 },
+    { t: 'Ella, you’re sitting inside “stellar” if you squint, and honestly that tracks.', c: 'pun', cheese: 3 },
+  ],
+  avery: [
+    { t: 'Avery is one letter off “every,” which is roughly how many times I reread this message before sending it.', c: 'wordplay', cheese: 2 },
+  ],
+  hazel: [
+    { t: 'Hazel — is that also the eye colour, or is that far too obvious a question? I’ve been debating whether to ask it for longer than I’d like to admit.', c: 'question', cheese: 2 },
+  ],
+  nora: [
+    { t: 'Nora backwards is Aron, which is nothing. Forwards it’s Nora, which is much better. Excellent work, forwards.', c: 'playful', cheese: 3 },
+  ],
+  layla: [
+    { t: 'Layla, you’ve got a Clapton song and I’ve got a guitar I bought in 2019 and have touched twice. Let’s agree not to make this a competition.', c: 'playful', cheese: 2 },
+  ],
+  aurora: [
+    { t: 'Aurora, your name is literally the northern lights. Mine is on a coffee cup somewhere, spelled wrong. I’m aware this is an uneven match.', c: 'wordplay', cheese: 2 },
+  ],
+  nova: [
+    { t: 'Nova: a star that suddenly gets dramatically brighter for no advance warning. Explains a lot, honestly.', c: 'wordplay', cheese: 2 },
+  ],
+  madison: [
+    { t: 'Madison is the only name I know that’s also an avenue, a president and an entire Wisconsin. That’s a range most people don’t have.', c: 'playful', cheese: 2 },
+  ],
+  grace: [
+    { t: 'Grace, I’m going to open with absolutely none of it and just hope the name rubs off on me.', c: 'wordplay', cheese: 2 },
+  ],
+  isla: [
+    { t: 'Isla is pronounced “eye-la” and spelled like it wants to be an island. Both are ambitious and I respect both.', c: 'wordplay', cheese: 2 },
+  ],
+  willow: [
+    { t: 'Willow rhymes with pillow, which is the coziest possible fact about a person and I’m choosing to take it as character evidence.', c: 'pun', cheese: 3 },
+  ],
+  riley: [
+    { t: 'Riley rhymes with smiley, which is lazy of me but I did check the alternatives and “wildly” was worse.', c: 'pun', cheese: 3 },
+  ],
+  stella: [
+    { t: 'Stella, I’m legally obligated to yell your name Brando-style at least once. It’s done. It happened quietly, in my apartment, and we never have to discuss it again.', c: 'playful', cheese: 3 },
+    { t: 'Stella means “star,” and “constellation” has your whole name inside it. Some people get a name; you got a whole night sky.', c: 'wordplay', cheese: 3 },
+  ],
+  ivy: [
+    { t: 'Nothing rhymes with Ivy. I checked. That’s twelve minutes of my evening dedicated entirely to you and we haven’t even spoken yet.', c: 'playful', cheese: 2 },
+  ],
+  victoria: [
+    { t: 'Victoria means “victory,” so statistically I’ve already lost this conversation. Going down swinging: hi.', c: 'wordplay', cheese: 2 },
+  ],
+  hannah: [
+    { t: 'Hannah is a palindrome. Exactly the same coming and going. I have never trusted anything more in my life.', c: 'wordplay', cheese: 2 },
+  ],
+  lucy: [
+    { t: 'Lucy means “light,” which is a lot to carry around, so I’ll keep this one low-wattage: hi, what are you up to this week?', c: 'wordplay', cheese: 1 },
+  ],
+  maya: [
+    { t: 'Maya, I want it formally noted that I did not open with a Maya Angelou quote. That took restraint I did not know I had.', c: 'playful', cheese: 2 },
+  ],
+  natalie: [
+    { t: 'Natalie comes from “born on Christmas Day.” So do I open with “happy birthday” or play it cool? I’ve clearly managed neither.', c: 'wordplay', cheese: 2 },
+  ],
+  valentina: [
+    { t: 'Valentina, you’ve got “valentine” hiding in there, which puts an unreasonable amount of pressure on February. Let’s start with a Tuesday instead.', c: 'wordplay', cheese: 3 },
+  ],
+  ruby: [
+    { t: 'Ruby is a gemstone, a Rolling Stones song and a programming language. That is a genuinely impressive portfolio for four letters.', c: 'playful', cheese: 2 },
+  ],
+  alice: [
+    { t: 'Alice, I have exactly one rabbit-hole joke and I’m saving it until I know you better. In the meantime: hi.', c: 'playful', cheese: 2 },
+  ],
+  autumn: [
+    { t: 'Autumn, you’re named after the best season and I’m named after nothing at all, so you’re winning before we start.', c: 'playful', cheese: 2 },
+  ],
+  athena: [
+    { t: 'Athena is the goddess of wisdom AND war, which is a lot to be up against on a Tuesday. I come in peace and with one question: what’s your week been like?', c: 'wordplay', cheese: 2 },
+  ],
+  savannah: [
+    { t: 'Savannah is an entire grassland biome and also a city in Georgia. My name doesn’t appear on a single map. Unfair, but I’ve made peace with it.', c: 'playful', cheese: 2 },
+  ],
+  iris: [
+    { t: 'Iris is a flower, a part of your eye, and the Greek goddess of rainbows. Three jobs. Do you get overtime for any of them?', c: 'wordplay', cheese: 2 },
+  ],
+  caroline: [
+    { t: 'Caroline, I’m not going to sing it. But we both know I’m thinking it. BAH BAH BAH.', c: 'playful', cheese: 3 },
+  ],
+  quinn: [
+    { t: 'Quinn rhymes with “win,” which I’m reading as an extremely good omen for this message and absolutely nothing else.', c: 'pun', cheese: 3 },
+  ],
+  piper: [
+    { t: 'Piper — if you can lead an entire town away with just a flute, could you please start with my group chat?', c: 'playful', cheese: 3 },
+  ],
+  melody: [
+    { t: 'Melody, your name is a musical term, which means every playlist I send you from here on is effectively a job interview. No pressure on me at all.', c: 'wordplay', cheese: 2 },
+  ],
+  anna: [
+    { t: 'Anna is a palindrome, which means your name reads the same no matter which direction you approach from. Structurally sound. I’ve got nothing but respect.', c: 'wordplay', cheese: 2 },
+  ],
+  jade: [
+    { t: 'Jade rhymes with lemonade, serenade and parade, so I’ve got three very different first-date options and no idea which one you’d pick. Help me out.', c: 'pun', cheese: 3 },
+  ],
+  rose: [
+    { t: 'Rose, I’ve decided not to make a single rose joke, which leaves me with roughly four words. Here they are: how’s your week going?', c: 'playful', cheese: 1 },
+  ],
+  ada: [
+    { t: 'Ada — as in Lovelace, as in the first computer programmer. So I’m going to assume you also debug things nobody else can figure out.', c: 'wordplay', cheese: 2 },
+  ],
+  daisy: [
+    { t: 'Daisy rhymes with lazy, crazy and hazy, and I’d like to know which one best describes your Sundays.', c: 'question', cheese: 2 },
+  ],
+  faith: [
+    { t: 'Faith, I’m going to need some, because I have now rewritten this message four times and this is the one that made it out.', c: 'wordplay', cheese: 2 },
+  ],
+  ruth: [
+    { t: 'Ruth, your name is “truth” minus one letter, so here’s some: I read your profile three times before writing anything.', c: 'wordplay', cheese: 2 },
+  ],
+  summer: [
+    { t: 'Summer, the only thing that properly rhymes with your name is “bummer,” which is deeply unfair to both of us. Let’s move past it immediately.', c: 'pun', cheese: 3 },
+  ],
+  juniper: [
+    { t: 'Juniper is the berry that makes gin taste like gin. I have been saving that fact for years, waiting for exactly this moment.', c: 'wordplay', cheese: 2 },
+  ],
+  mary: [
+    { t: 'Mary, quite contrary — no. I’m not finishing that. How’s the garden though?', c: 'playful', cheese: 3 },
+  ],
+  jasmine: [
+    { t: 'Jasmine is a flower, a tea and a princess. I am a person with a phone. We’ll find a way to make this work.', c: 'playful', cheese: 2 },
+  ],
+  wren: [
+    { t: 'Wren, you’re named after a bird that is tiny and astonishingly loud, and I mean that as the highest compliment currently available to me.', c: 'wordplay', cheese: 2 },
+  ],
+  sage: [
+    { t: 'Sage, your name is hiding inside the word “message,” which is either a coincidence or the universe telling me to send this one. I’ve gone with the second reading.', c: 'wordplay', cheese: 3 },
+  ],
+  michelle: [
+    { t: 'Michelle, ma belle. That’s it, that’s the entire opener — the Beatles did the heavy lifting and I’m just here taking credit.', c: 'playful', cheese: 3 },
+  ],
+  ophelia: [
+    { t: 'Ophelia, I looked up your name’s most famous namesake and it did NOT go well for her, so let’s agree to write a considerably better version.', c: 'playful', cheese: 2 },
+  ],
+  cecilia: [
+    { t: 'Cecilia, you’re breaking my heart — sorry. That was involuntary. Your name did that, not me.', c: 'playful', cheese: 3 },
+  ],
+  alexa: [
+    { t: 'Alexa, I promise this is the last time anyone makes that joke to you today. Although realistically I’m somewhere in the middle of the queue. Sorry.', c: 'playful', cheese: 3 },
+  ],
+  amber: [
+    { t: 'Amber is fossilised tree resin that trapped a mosquito and gave us Jurassic Park. Your name has better credits than most working actors.', c: 'wordplay', cheese: 2 },
+  ],
+  jane: [
+    { t: 'Jane, you’ve got Austen, Eyre and Goodall. Three of the best Janes in recorded history and absolutely no pressure at all.', c: 'playful', cheese: 2 },
+  ],
+  fiona: [
+    { t: 'Fiona, I’m aware of the Shrek situation and I am choosing to rise above it. Barely. With visible effort.', c: 'playful', cheese: 2 },
+  ],
+  phoebe: [
+    { t: 'Phoebe, I need to know immediately whether you can play guitar, and whether any of the songs are about cats.', c: 'question', cheese: 3 },
+  ],
+  gemma: [
+    { t: 'Gemma literally means “gem” in Italian. That’s not a line, that’s just etymology doing my job for me.', c: 'wordplay', cheese: 2 },
+  ],
+  rosemary: [
+    { t: 'Rosemary, you’re a rose AND a Mary AND a herb. Some people can’t commit to one thing and you’ve managed three.', c: 'wordplay', cheese: 3 },
+  ],
+  katie: [
+    { t: 'Katie, the only decent rhyme is “lately,” so: how have you been, lately? That’s the whole opener. It took eleven minutes.', c: 'pun', cheese: 3 },
+  ],
+  amanda: [
+    { t: 'Amanda literally means “worthy of being loved,” which is an unfair head start over the rest of us who got names meaning “man” or “farmer.”', c: 'wordplay', cheese: 2 },
+  ],
+  sabrina: [
+    { t: 'Sabrina rhymes with ballerina and arena, so you’re either extremely graceful or extremely competitive. My money is on both.', c: 'pun', cheese: 3 },
+  ],
+  veronica: [
+    { t: 'Veronica rhymes with harmonica. That’s the best fact I have and I’m leading with it because I’m not proud.', c: 'pun', cheese: 3 },
+  ],
+  paige: [
+    { t: 'Paige, your name is a page, which makes this message chapter one. I heard it as I typed it and I sent it anyway.', c: 'pun', cheese: 3 },
+  ],
+  ember: [
+    { t: 'Ember, you’re named after the part of a fire that’s still going long after everyone else has gone to bed. That is a genuinely great thing to be named.', c: 'wordplay', cheese: 2 },
+  ],
+  jessica: [
+    { t: 'Jessica was invented by Shakespeare for The Merchant of Venice. Your name has a writing credit. Mine has a spot on a keychain rack.', c: 'wordplay', cheese: 2 },
+  ],
+  serena: [
+    { t: 'Serena literally means “calm” and rhymes with “arena.” That is a fun amount of tension to carry around all day.', c: 'wordplay', cheese: 2 },
+  ],
+  vanessa: [
+    { t: 'Vanessa was completely made up by Jonathan Swift for a poem. Your name is fan fiction that won. I find that genuinely inspiring.', c: 'wordplay', cheese: 2 },
+  ],
+  claire: [
+    { t: 'Claire means “clear,” which is more than can be said for this message. Second attempt: hi, I liked your profile and wanted to say so.', c: 'wordplay', cheese: 1 },
+  ],
+  freya: [
+    { t: 'Freya is the Norse goddess of love and war, which I assume makes you excellent at both texting and ignoring texts.', c: 'wordplay', cheese: 2 },
+  ],
+  hope: [
+    { t: 'Hope, the only real rhyme is “nope,” which I am choosing to ignore entirely, on principle, out of respect for the name.', c: 'pun', cheese: 3 },
+  ],
+  jolene: [
+    { t: 'Jolene, I’m begging you — no, wait. That’s the song. Starting again: hi, how’s your week going?', c: 'playful', cheese: 3 },
+  ],
+  joy: [
+    { t: 'Joy, your name is sitting right inside the word “enjoy,” which is a lovely bit of design work by the English language.', c: 'wordplay', cheese: 2 },
+  ],
+  lorelei: [
+    { t: 'Lorelei is a siren who lured sailors onto the rocks. I am walking directly toward that, fully informed, at my own risk.', c: 'wordplay', cheese: 3 },
+  ],
+  matilda: [
+    { t: 'Matilda, if you can move objects with your mind, please move this conversation forward, because I am nearly out of material.', c: 'playful', cheese: 3 },
+  ],
+  olive: [
+    { t: 'Olive, I have exactly one joke available here and it is “olive you,” and I have decided I am better than that. Barely. By a very small margin.', c: 'pun', cheese: 3 },
+  ],
+  paloma: [
+    { t: 'Paloma is both a dove and a tequila drink. One of those is a first-date suggestion and I’ll let you work out which.', c: 'wordplay', cheese: 2 },
+  ],
+  penny: [
+    { t: 'Penny, I’d offer you a penny for your thoughts but that feels like a lowball given current inflation.', c: 'pun', cheese: 3 },
+  ],
+  persephone: [
+    { t: 'Persephone runs the underworld for half the year. I’m asking for roughly an hour of the other half.', c: 'wordplay', cheese: 2 },
+  ],
+  river: [
+    { t: 'River, you’re named after a thing that never stops moving, which I’m reading as a warning and choosing to ignore completely.', c: 'wordplay', cheese: 2 },
+  ],
+  roxanne: [
+    { t: 'Roxanne, you don’t have to put on the red light — okay. That’s out of my system now. We can talk like normal people.', c: 'playful', cheese: 3 },
+  ],
+  stevie: [
+    { t: 'Stevie, I need to establish within two messages whether we’re talking Nicks or Wonder, because it changes my entire approach.', c: 'question', cheese: 2 },
+  ],
+  vera: [
+    { t: 'Vera means “truth,” so here’s some: I typed and deleted this message four times before one of them made it out.', c: 'wordplay', cheese: 1 },
+  ],
+  zelda: [
+    { t: 'Zelda, I want you to know that I considered the video game joke, decided firmly against it, and then told you about it anyway.', c: 'playful', cheese: 2 },
+  ],
+  felicity: [
+    { t: 'Felicity literally means “happiness.” No notes. Whoever named you nailed it on the first attempt.', c: 'wordplay', cheese: 2 },
+  ],
+  helen: [
+    { t: 'Helen, I am not going to say the thousand-ships thing. I am going to think it, silently, and then ask how your week has been.', c: 'playful', cheese: 2 },
+  ],
+  eve: [
+    { t: 'Eve, you have the shortest name and the longest backstory of anyone on this app. That’s efficiency.', c: 'playful', cheese: 2 },
+  ],
+  georgia: [
+    { t: 'Georgia, you’ve got a state, a country and a Ray Charles song. I checked whether I had any of those. I do not.', c: 'playful', cheese: 2 },
+  ],
+  molly: [
+    { t: 'Molly rhymes with jolly and trolley, which between them describe a genuinely excellent Saturday. Am I close?', c: 'pun', cheese: 3 },
+  ],
+  june: [
+    { t: 'June, you’re an entire month, and honestly one of the better ones. That is not nothing.', c: 'playful', cheese: 2 },
+  ],
+  liam: [
+    { t: 'Liam is just William with the William removed. Extremely efficient. I respect the trimming.', c: 'wordplay', cheese: 3 },
+  ],
+  noah: [
+    { t: 'Noah, I’m going to need two of everything for this date. I’m sorry. Your name did this, not me.', c: 'playful', cheese: 3 },
+  ],
+  wyatt: [
+    { t: 'Wyatt rhymes with both “riot” and “quiet,” which are two extremely different evenings. Which one am I getting?', c: 'question', cheese: 2 },
+  ],
+  atlas: [
+    { t: 'Atlas holds up the entire sky. I’m only asking you to hold up one conversation, and I think that’s reasonable.', c: 'wordplay', cheese: 2 },
+  ],
+  leo: [
+    { t: 'Leo means lion, which is an enormous amount to live up to before you can even talk.', c: 'wordplay', cheese: 2 },
+  ],
+  jude: [
+    { t: 'Jude — hey. That’s the reference. You’ve heard it ten thousand times and I went ahead and did it anyway.', c: 'playful', cheese: 3 },
+  ],
+  max: [
+    { t: 'Max is short for “greatest.” Mine is short for nothing at all. Uneven start, but I’ll manage.', c: 'wordplay', cheese: 2 },
+  ],
+  otto: [
+    { t: 'Otto is a palindrome. Structurally sound in both directions. I have a lot of respect for that.', c: 'wordplay', cheese: 2 },
+  ],
+};
+
+// Fold the claims into the gems themselves, so the engine only has to read `f`.
+for (const [key, claims] of Object.entries(GEM_CLAIMS)) {
+  const gems = GEMS[key];
+  if (!gems) throw new Error(`GEM_CLAIMS names "${key}", which has no gems`);
+  claims.forEach((family, i) => {
+    if (gems[i]) gems[i].f = family;
+  });
+}
+
+// ── end src/knowledge.js ──
+
+// The line engine. Given a name, assemble candidate openers from every family
+// that has something to work with, then pick a varied set.
+//
+// Runs unchanged in Node and in the browser — no imports beyond the data files.
+
+
+// --- tiny deterministic PRNG so a given name always gets the same set ---------
+function hashStr(s) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffled(arr, rnd) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// --- name helpers ------------------------------------------------------------
+function normalizeName(input) {
+  const raw = String(input || '').trim().replace(/\s+/g, ' ');
+  if (!raw) return '';
+  // Take the first word only — "Emma Watson" is a lookup for Emma.
+  const first = raw.split(' ')[0];
+  return first
+    .split(/([-'’])/)
+    .map((part) => (/^[-'’]$/.test(part) ? part : part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()))
+    .join('');
+}
+
+const letterKey = (n) => n.toLowerCase().replace(/[^a-z]/g, '');
+
+// "a marina" -> "marina". Rhyme entries carry their article so they read well in
+// a sentence; comparisons have to look past it.
+const bareWord = (w) => letterKey(String(w).replace(/^(a|an|the)\s+/i, ''));
+
+// Vowel pairs that reliably make ONE sound in a name.
+const SAFE_VOWEL_PAIRS = /^(ee|oo|ai|ay|ey|oy|au|ou|aw|ew|ui|ie)$/;
+
+/**
+ * Syllable count, or null when the spelling is genuinely ambiguous.
+ *
+ * Counting vowel groups gets Emma and Bailey right and Penelope, Olivia and
+ * Chloe wrong — a trailing "e" is silent in Grace and sounded in Chloe, and "ia"
+ * is one sound in some names and two in others, with nothing in the spelling to
+ * tell them apart. Rather than print a wrong number in a line somebody is about
+ * to send, this returns null for anything it can't count confidently and the
+ * syllable line simply doesn't appear for that name.
+ */
+function syllables(name) {
+  const w = letterKey(name);
+  if (!w) return null;
+  if (/[a-z]e$/.test(w)) return null; // Grace (1) and Chloe (2) look identical here.
+  const groups = w.match(/[aeiouy]+/g);
+  if (!groups) return null;
+  for (const g of groups) {
+    if (g.length > 2) return null;
+    if (g.length === 2 && !SAFE_VOWEL_PAIRS.test(g)) return null; // "ia", "oa", "eo"…
+  }
+  return groups.length;
+}
+
+const NUMBER_WORD = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const numWord = (n) => NUMBER_WORD[n] || String(n);
+
+// Variant lookup, built once from the clusters.
+const VARIANTS = (() => {
+  const map = new Map();
+  for (const cluster of VARIANT_CLUSTERS) {
+    for (const name of cluster) {
+      const others = cluster.filter((c) => c !== name);
+      const key = letterKey(name);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(...others);
+    }
+  }
+  return map;
+})();
+
+// --- hooks -------------------------------------------------------------------
+
+// Words with the name sitting inside them, best candidates first.
+function hiddenWords(name) {
+  const key = letterKey(name);
+  if (key.length < 3) return [];
+  const minExtra = key.length === 3 ? 3 : 2;
+  const hits = [];
+  for (const word of FUN_WORDS) {
+    if (word.length < key.length + minExtra) continue;
+    if (HIDDEN_BLOCKLIST.has(word)) continue;
+    const idx = word.indexOf(key);
+    if (idx < 0) continue;
+    const atEnd = idx + key.length === word.length;
+    const atStart = idx === 0;
+    hits.push({
+      word,
+      idx,
+      // Reveals read best when the name is flush to one end of the word.
+      score: (atEnd ? 3 : atStart ? 2 : 0) + (word.length <= 11 ? 1 : 0),
+    });
+  }
+  hits.sort((a, b) => b.score - a.score || a.word.length - b.word.length);
+  return hits;
+}
+
+function splitWord(word, idx, len, display) {
+  const pre = word.slice(0, idx);
+  const post = word.slice(idx + len);
+  return [pre, display, post].filter(Boolean).join('-');
+}
+
+function rhymesFor(name) {
+  const key = letterKey(name);
+  if (NO_RHYME.has(key)) return [];
+  for (const [suffix, words] of RIMES) {
+    if (key.length >= suffix.length && key.endsWith(suffix)) {
+      // "Ella rhymes with umbrella" is fine; "Marina rhymes with a marina" is not,
+      // so compare after stripping the article.
+      const usable = words.filter((w) => bareWord(w) !== key);
+      if (usable.length) return usable;
+    }
+  }
+  return [];
+}
+
+// --- families ----------------------------------------------------------------
+// Each returns candidate lines. `tier` drives ranking: 0 is the hand-written
+// stuff, 3 is the ballast that works for anybody.
+
+// A gem may claim another family's slot via `f`. Gems sort first, so claiming
+// 'rhyme' means the hand-written rhyme joke runs and the generic one steps
+// aside — otherwise Quinn gets told twice that she rhymes with "win".
+//
+// Family claims are hand-maintained, so they only catch collisions somebody
+// thought of. `uses` catches the rest at the word level: any word a gem already
+// spent is off the table for every other line in the set.
+function famGems(n) {
+  const list = GEMS[letterKey(n.name)] || [];
+  const vocabulary = [
+    ...hiddenWords(n.name).map((h) => h.word),
+    ...rhymesFor(n.name).map(bareWord),
+  ];
+  return list.map((g) => {
+    const lower = g.t.toLowerCase();
+    return {
+      text: g.t,
+      category: g.c,
+      cheese: g.cheese,
+      family: g.f || 'gem',
+      tier: 0,
+      uses: [...new Set(vocabulary.filter((w) => w && lower.includes(w)))],
+    };
+  });
+}
+
+function famHidden(n) {
+  const hits = hiddenWords(n.name).slice(0, 2);
+  const out = [];
+  hits.forEach((hit, i) => {
+    const shown = splitWord(hit.word, hit.idx, letterKey(n.name).length, n.name);
+    if (i === 0) {
+      out.push({
+        text: `Bad news, ${n.name}: I can’t unsee your name inside “${hit.word}”. It reads as ${shown} now, permanently. What exactly have you done to my vocabulary?`,
+        category: 'pun', cheese: 3, family: 'hidden', tier: 1, uses: [hit.word],
+      });
+    } else {
+      out.push({
+        text: `Discovery of the evening, ${n.name}: your name is hiding inside “${hit.word}” (${shown}). I found that at around 11pm, entirely sober, and it felt like genuine progress. This is the level of productivity you’re dealing with.`,
+        category: 'pun', cheese: 3, family: 'hidden', tier: 1, uses: [hit.word],
+      });
+    }
+  });
+  return out;
+}
+
+function famRhyme(n) {
+  const r = rhymesFor(n.name);
+  if (!r.length) {
+    return [{
+      text: `Nothing rhymes with ${n.name}. I know this because I tried for considerably longer than a reasonable person would, and now you have to live with the fact that this is what my evening became.`,
+      category: 'playful', cheese: 2, family: 'rhyme', tier: 1,
+    }];
+  }
+  const uses = r.slice(0, 2).map(bareWord);
+  const out = [{
+    text: `${n.name} rhymes with ${r[0]}, which I established by working through every alternative${r[1] ? ` — “${r[1]}” came a distant second` : ''}. That is where my evening went. How was yours?`,
+    category: 'pun', cheese: 3, family: 'rhyme', tier: 1, uses,
+  }];
+  if (r[1]) {
+    out.push({
+      text: `I wanted to open with a rhyme, ${n.name}. The options were ${r[0]} and ${r[1]}, and neither of them does you justice, so I’ll do this instead: what’s the best thing you’ve got planned this week?`,
+      category: 'question', cheese: 1, family: 'rhyme', tier: 1, uses,
+    });
+  }
+  return out;
+}
+
+function famMeaning(n) {
+  const m = MEANINGS[letterKey(n.name)];
+  if (!m) return [];
+  return [
+    {
+      text: `Fun fact I looked up instead of going to sleep: ${n.name} means “${m}”. That is a great deal to be handed at birth. How’s it going so far?`,
+      category: 'wordplay', cheese: 2, family: 'meaning', tier: 1,
+    },
+    {
+      text: `${n.name} means “${m}”, which is a bold opening statement from your parents. Mine went with a name that means, roughly, “a guy”.`,
+      category: 'wordplay', cheese: 2, family: 'meaning', tier: 1,
+    },
+  ];
+}
+
+function famNickname(n) {
+  const nick = NICKNAMES[letterKey(n.name)];
+  if (!nick) return [];
+  return [{
+    text: `Something I’d like settled early, ${n.name}: are you a ${nick}, or is that a privilege a person has to earn first?`,
+    category: 'question', cheese: 1, family: 'nickname', tier: 2,
+  }];
+}
+
+function famVariant(n) {
+  const alts = VARIANTS.get(letterKey(n.name));
+  if (!alts || !alts.length) return [];
+  return [{
+    text: `Before this goes any further I need to know — ${n.name} or ${alts[0]}? I want to spell it right, and I want it on record that I asked rather than guessed.`,
+    category: 'question', cheese: 1, family: 'variant', tier: 2,
+  }];
+}
+
+function famShape(n) {
+  const key = letterKey(n.name);
+  const out = [];
+  if (key.length >= 3 && key === key.split('').reverse().join('')) {
+    out.push({
+      text: `Hold on — ${n.name} is a palindrome. Identical forwards and backwards. Give me a moment; I don’t often meet someone who is structurally symmetrical.`,
+      category: 'wordplay', cheese: 2, family: 'shape', tier: 2,
+    });
+  } else if (key.length >= 3 && key[0] === key[key.length - 1]) {
+    out.push({
+      text: `Your name starts and ends with the same letter, ${n.name}, which reads like a very deliberate design decision. Whoever named you knew precisely what they were doing.`,
+      category: 'wordplay', cheese: 2, family: 'shape', tier: 2,
+    });
+  }
+  const dbl = key.match(/([a-z])\1/);
+  if (dbl) {
+    out.push({
+      text: `${n.name}, there’s a double ${dbl[1].toUpperCase()} in there, which I have decided means you do everything twice as intensely as strictly necessary. Accurate?`,
+      category: 'playful', cheese: 2, family: 'double', tier: 2,
+    });
+  }
+  return out;
+}
+
+function famAlliteration(n) {
+  const l = letterKey(n.name)[0];
+  const pair = ALLITERATION[l];
+  if (!pair) return [];
+  return [{
+    text: `Okay ${n.name} — working theory: people whose names start with ${l.toUpperCase()} are either ${pair[0]} or ${pair[1]}. Which one am I dealing with?`,
+    category: 'question', cheese: 1, family: 'alliteration', tier: 2,
+  }];
+}
+
+function famAcrostic(n) {
+  const key = letterKey(n.name);
+  // Distinct letters only — "E — …. M — …. M — …." reads like a bug, because it is.
+  const ls = [...new Set(key.split(''))].filter((l) => ACROSTIC[l]).slice(0, 3);
+  if (ls.length < 3) return [];
+  const body = ls.map((l) => `${l.toUpperCase()} — ${ACROSTIC[l]}`).join('. ');
+  return [{
+    text: `${n.name}, I tried building an acrostic out of the letters in your name and got three in before losing my nerve. ${body}. You’ll have to finish the rest yourself.`,
+    category: 'playful', cheese: 2, family: 'acrostic', tier: 2,
+  }];
+}
+
+function famSyllables(n) {
+  const s = syllables(n.name);
+  if (!s) return [];
+  const word = numWord(s);
+  return [{
+    text: `${word.charAt(0).toUpperCase()}${word.slice(1)} syllable${s === 1 ? '' : 's'}, and I have already said your name out loud twice to be sure I’d get it right in person. That is the level of preparation you’re dealing with, ${n.name}.`,
+    category: 'playful', cheese: 2, family: 'syllables', tier: 3,
+  }];
+}
+
+function famRank(n) {
+  if (!n.rank) return [];
+  const bucket = n.rank <= 60 ? 'common' : n.rank <= 400 ? 'mid' : 'rare';
+  const kind = n.gender === 'm' ? 'boys’' : n.gender === 'f' ? 'girls’' : '';
+  return RANK_LINES[bucket].map((l) => ({
+    text: l.t.replace(/\{name\}/g, n.name).replace(/\{rank\}/g, String(n.rank)).replace(/\{kind\}/g, kind).replace(/ {2,}/g, ' '),
+    category: l.c, cheese: l.cheese, family: 'rank', tier: 3,
+  }));
+}
+
+function famUniversal(n) {
+  return UNIVERSAL.map((l, i) => ({
+    text: l.t.replace(/\{name\}/g, n.name).replace(/\{letters\}/g, numWord(letterKey(n.name).length)),
+    category: l.c, cheese: l.cheese, family: `universal${i}`, tier: 3,
+  }));
+}
+
+const FAMILIES = [
+  famGems, famHidden, famRhyme, famMeaning, famNickname, famVariant,
+  famShape, famAlliteration, famAcrostic, famSyllables, famRank, famUniversal,
+];
+
+/**
+ * All candidate lines for a name, unranked.
+ * meta: { gender?: 'f'|'m'|'u', rank?: number }
+ */
+function candidatesFor(name, meta = {}) {
+  const n = { name: normalizeName(name), gender: meta.gender || null, rank: meta.rank || null };
+  if (!n.name) return [];
+  return FAMILIES.flatMap((f) => f(n));
+}
+
+/**
+ * The picked set. Deterministic for a given (name, round).
+ *
+ * Diversity rules, in order of how much they matter:
+ *  - one line per family, so no name gets three rhyme jokes
+ *  - at least MIN_LOW low-cheese lines, because ten puns in a row is a bit
+ *  - no more than MAX_HIGH high-cheese lines, for the same reason
+ */
+function linesFor(name, meta = {}, opts = {}) {
+  const count = opts.count || 10;
+  const round = opts.round || 0;
+  const display = normalizeName(name);
+  if (!display) return { name: '', lines: [] };
+
+  const rnd = mulberry32(hashStr(letterKey(display)) + round * 7919);
+  let pool = shuffled(candidatesFor(display, meta), rnd);
+  if (opts.categories && opts.categories.length) {
+    pool = pool.filter((l) => opts.categories.includes(l.category));
+  }
+  if (typeof opts.maxCheese === 'number') {
+    pool = pool.filter((l) => l.cheese <= opts.maxCheese);
+  }
+  pool.sort((a, b) => a.tier - b.tier);
+
+  // The low-cheese quota can't demand more than the filtered pool holds — asking
+  // for three sincere lines inside a puns-only filter would starve the set.
+  const MIN_LOW = Math.min(3, pool.filter((l) => l.cheese <= 1).length);
+  const MAX_HIGH = 5;
+  const picked = [];
+  const usedFamily = new Set();
+  const usedWords = new Set();
+  let high = 0;
+
+  const take = (line) => {
+    picked.push(line);
+    usedFamily.add(line.family);
+    (line.uses || []).forEach((w) => usedWords.add(w));
+    if (line.cheese >= 3) high++;
+  };
+  const repeatsAWord = (line) => (line.uses || []).some((w) => usedWords.has(w));
+
+  for (const line of pool) {
+    if (picked.length >= count) break;
+    if (usedFamily.has(line.family)) continue;
+    if (repeatsAWord(line)) continue;
+    if (line.cheese >= 3 && high >= MAX_HIGH) continue;
+    // Leave room for the low-cheese quota.
+    const lowSoFar = picked.filter((p) => p.cheese <= 1).length;
+    const slotsLeft = count - picked.length;
+    if (line.cheese > 1 && lowSoFar + slotsLeft <= MIN_LOW) continue;
+    take(line);
+  }
+
+  // Backfill if the constraints starved us (very short or unknown names).
+  if (picked.length < count) {
+    for (const line of pool) {
+      if (picked.length >= count) break;
+      if (picked.includes(line)) continue;
+      if (usedFamily.has(line.family)) continue;
+      if (repeatsAWord(line)) continue;
+      take(line);
+    }
+  }
+
+  return {
+    name: display,
+    gender: meta.gender || null,
+    rank: meta.rank || null,
+    lines: picked.slice(0, count),
+  };
+}
+
+const _internals = { syllables, letterKey, hashStr };
+
+// ── end src/engine.js ──
+
+// The 2000-name roster: name -> { name, gender, rank }.
+//
+// Rank is per-gender. A name that appears on both lists is tagged 'u' (unisex)
+// and keeps its better (lower) rank, since that's the one worth quoting.
+
+
+const TOTAL = FEMALE_TARGET + MALE_TARGET; // 2000 DISTINCT names
+
+const byKey = new Map();
+
+function add(name, gender, rank) {
+  const key = name.toLowerCase();
+  const existing = byKey.get(key);
+  if (!existing) {
+    byKey.set(key, { name, gender, rank });
+    return true;
+  }
+  // Already on the other list: unisex, and quote whichever rank is better.
+  existing.gender = 'u';
+  existing.rank = Math.min(existing.rank, rank);
+  return false;
+}
+
+FEMALE.slice(0, FEMALE_TARGET).forEach((n, i) => add(n, 'f', i + 1));
+
+// Keep pulling from the boys' list until the roster holds 2000 DISTINCT names —
+// the ~65 unisex names appear on both lists and must not be counted twice. Past
+// the 2000 mark we keep scanning, but only to tag names already in the roster as
+// unisex; nothing new is added.
+for (let i = 0; i < MALE.length; i++) {
+  const key = MALE[i].toLowerCase();
+  if (byKey.size >= TOTAL && !byKey.has(key)) continue;
+  add(MALE[i], 'm', i + 1);
+}
+
+if (byKey.size !== TOTAL) {
+  throw new Error(`roster is ${byKey.size} names, expected ${TOTAL} — the source lists are too short`);
+}
+
+const ROSTER = byKey;
+const ALL_NAMES = [...byKey.values()];
+
+/** Roster entry for a name, or null. Case-insensitive. */
+function lookup(name) {
+  return byKey.get(String(name || '').trim().toLowerCase().split(/\s+/)[0]) || null;
+}
+
+/**
+ * Type-ahead search. Exact match first, then prefix, then substring; each group
+ * ordered by popularity so the common spelling wins the top slot.
+ */
+function search(query, limit = 8) {
+  const q = String(query || '').trim().toLowerCase();
+  if (!q) return [];
+  const exact = [];
+  const prefix = [];
+  const inner = [];
+  for (const entry of byKey.values()) {
+    const k = entry.name.toLowerCase();
+    if (k === q) exact.push(entry);
+    else if (k.startsWith(q)) prefix.push(entry);
+    else if (q.length >= 3 && k.includes(q)) inner.push(entry);
+  }
+  const byRank = (a, b) => a.rank - b.rank;
+  return [...exact.sort(byRank), ...prefix.sort(byRank), ...inner.sort(byRank)].slice(0, limit);
+}
+
+// ── end src/roster.js ──
+
+window.mountApp({ linesFor, normalizeName, lookup, search, ROSTER, ALL_NAMES, TOTAL });
+})();
+</script>
+<script>
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+</script>
+</body>
+</html>
