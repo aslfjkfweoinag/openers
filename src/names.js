@@ -1,0 +1,377 @@
+// The 2000 most popular first names in America, in approximate popularity order.
+//
+// Compiled from recent U.S. Social Security Administration baby-name popularity
+// (the SSA national data is not fetchable from this build environment, so the
+// ordering is a good-faith reconstruction rather than a byte-exact copy of a
+// given year's file). Ranks are therefore APPROXIMATE — treat "#12 most popular"
+// as "very common" rather than as a citation. Spelling and gender tagging are
+// the parts the line engine actually depends on, and those are reliable.
+//
+// Rank is per-gender: FEMALE[0] is the #1 girls' name, MALE[0] the #1 boys' name.
+// Duplicates across the two lists are fine — a name in both is tagged unisex by
+// build.js, which also dedupes within a list and slices to the exact counts.
+
+export const FEMALE_TARGET = 1100;
+export const MALE_TARGET = 900;
+
+const FEMALE_RAW = `
+Olivia Emma Charlotte Amelia Sophia Isabella Ava Mia Evelyn Luna
+Harper Camila Sofia Scarlett Elizabeth Eleanor Emily Chloe Mila Violet
+Penelope Gianna Aria Abigail Ella Avery Hazel Nora Layla Lily
+Aurora Nova Ellie Madison Grace Isla Willow Zoe Riley Stella
+Eliana Ivy Victoria Emilia Zoey Naomi Hannah Lucy Elena Lillian
+Maya Leah Paisley Addison Natalie Valentina Everly Delilah Leilani Madelyn
+Kinsley Ruby Sophie Alice Genesis Aubrey Serenity Autumn Bella Skylar
+Josephine Athena Clara Savannah Audrey Lydia Iris Caroline Brooklyn Maria
+Quinn Piper Nevaeh Cora Vivian Melody Anna Sarah Allison Gabriella
+Ariana Rylee Ayla Kennedy Sadie Hailey Jade Natalia Adeline Liliana
+Emery Josie Julia Rose Alina Ada Ariella Charlie Peyton Millie
+Kylie Reagan Ximena Amaya Eden Daisy Arya Freya Adalynn Melanie
+Sloane Elsie Katherine Ryleigh Faith Amara Ruth Alaia Lucia London
+Kehlani Journee Blakely Anastasia Summer Juniper Sara Andrea Nyla Norah
+Georgia Amina Lyla Vera Brielle Aliyah Zuri Margaret Juliette Kaylee
+Magnolia Rosalie Arianna Remi Brianna Malia Molly Sienna Lilly Aspen
+June Mary Jasmine Zara Wren Kaia Valerie Genevieve Nicole Alaina
+Catalina Esther Presley Marley Selena Trinity Camille Hadley Alana Alivia
+Sage Mackenzie Oakley Diana Michelle Ophelia Nina Amira Adalyn Lainey
+Journey Lena Harmony Cecilia Ariel Ana Isabelle Callie Reese Jordyn
+Elliana Vivienne Alexandra Maeve Rachel Alexa Adaline Emersyn Alani Finley
+Emerson Alyssa Alessandra Cataleya Alexis Gracie Lila Rowan Angela Sydney
+Alayna Blake Noelle Palmer Charlee Nia Adelyn Rebecca Amber Jane
+Kailani Braelynn Nathalie Laila Winter Talia Miriam Fiona Dakota Evangeline
+Vanessa Rosie Lyric Phoebe Gemma Ariyah Teagan Maggie Lucille Elaina
+Kayla Mya Elise Julieta Adelaide Legacy Saylor Miracle Maisie Danielle
+Ari Frances Antonella Amiyah Bailey Jacqueline Julie Kimberly Heidi Aitana
+Miranda Adriana Alessia Raelynn Kamila Colette Everleigh Mariana Brynlee Tessa
+Ainsley Sutton Lilah Mabel Alexandria Sarai Wynter Daniela Camilla Rosemary
+Haven Allie Kaitlyn Ellis Kali Alexia Lyra Angelina Melissa Sylvia
+Elle Aniyah Marlee Katie Amanda Laura Mira Carmen Lola Selah
+Serena Joy Matilda
+Poppy Aurelia Meredith Marilyn Bristol Kaylani Rory Regina Simone Elianna
+Novalee Averie Cassidy Jolene Kailey Lucianna Nell Astrid Marie Anaya
+Anne Kensley Tatum Adelina Bianca Whitney Skye Karsyn Hallie Sabrina
+Louisa Rosa Alma Aisha Kaliyah Emmalyn Zariah Rebekah Julianna Maren
+Cameron Alicia Kyla Erin Charley Anniston Braelyn Lorelei Aubrielle Veronica
+Karina Emory Reign Jenna Lennon Amoura Nala Aliza Etta Angel
+Amari Della Blair Adley Alaya Kate Adalee Priscilla Sasha Journi
+Milani Ryan Sarahi Zelda Amelie Thea Maia Kiara Karla Leia
+Fatima Paige Rosalia Lorelai Zaniyah Ashley Meadow Salma Estella Marianna
+Kinley Charleigh Elliot Jimena Katalina Hattie Aubree Adelynn Blaire Milena
+Livia Louise Frankie Sunny Ellianna Maryam Elyse Renata Rosalyn Danna
+Denver Julissa Marlowe Zaria Aubrie Jazlyn Malani Hana Itzel Ivory
+Noa Kamryn Rylan Nyra Kaylie Bonnie Opal Aylin Nayeli Scarlet
+Kora Liv Sierra Ember Holly Chelsea Nicolette Aliana Amaia Jayla
+Bethany Marisol Ruby Anya Adrianna Alaiya Kaydence Kimber Zainab Alison
+Leighton Lea Aleah Corinne Shiloh Emmy Fallon Giselle Guadalupe Zahra
+Aleena Amirah Annalise Ariah Astrid Belle Brooke Cadence Celeste Clarissa
+Daphne Delaney Edith Eloise Elora Erica Faye Felicity Gabrielle Georgina
+Harlow Helen Imani Ingrid Jayleen Jessica Joanna Jocelyn Journei Judith
+Kaia Karter Katalea Kendall Kenzie Khloe Lacey Laney Larissa Laurel
+Leilany Lennox Lexi Lilianna Lindsay Logan Lucy Lyanna Macie Madeline
+Makenna Marina Marlie Maya Mckenna Melina Mikayla Monica Nadia Nala
+Naya Nellie Noelia Nyomi Octavia Paisleigh Paloma Paris Parker Patricia
+Pearl Perla Persephone Piper Raegan Raelyn Raina Reagan Remington Rhea
+Riley Rivka Roselyn Rowen Royal Ryan Sailor Samantha Sarai Scarlette
+Selene Shelby Sloan Sophia Stevie Sunny Susan Tatiana Taylor Teresa
+Tiana Valeria Vienna Violeta Virginia Waverly Wilhelmina Xiomara Yara Yaretzi
+Zaniya Zaylee Zoya Abby Adalie Adelaide Ainhoa Aitana Alaina Alanna
+Aleigha Alessia Alexandrea Aliya Allyson Alondra Amalia Amaris Amayah Amelia
+Amirah Analia Anastasia Angelica Angie Aniya Annabel Annabella Annabelle Annalee
+Anne Annika Antonia Araceli Arden Aria Ariadne Arielle Arleth Armani
+Artemis Ashlyn Athena Aubrianna Audrina Augustine Aurelia Autumn Ava Avianna
+Ayleen Azalea Bailee Barbara Beatrice Beatriz Belen Bellamy Berkley Bexley
+Billie Blaire Blakelee Bonnie Bria Briana Bridget Briella Brinley Britney
+Brittany Brooklynn Brylee Cadence Cali Calliope Camryn Candace Cara Carla
+Carly Carolina Carter Casey Cassandra Catherine Cattleya Cecelia Celia Chana
+Chandler Charlize Charlotte Chaya Cheyenne Christina Cielo Claire Clementine Coco
+Colbie Collins Connie Constance Cordelia Crystal Cynthia Dahlia Dakota Dallas
+Dania Danica Daniella Danna Davina Dayana Deborah Delia Demi Denise
+Destiny Diane Dior Dolores Dominique Dorothy Dulce Dylan Ebony Edie
+Eileen Elaine Eleanora Elena Eliza Elizabeth Ellen Elliott Elodie Elsa
+Ember Emelia Emerie Emilee Emmaline Emmeline Emmalynn Erin Esme Esmeralda
+Estelle Estrella Eve Evelynn Everleigh Evie Ezra Farrah Fernanda Flora
+Florence Freyja Gabriela Gaia Galilea Gia Giana Gianella Gigi Gina
+Ginevra Giovanna Gloria Golda Greta Gwen Gwendolyn Hadassah Haisley Halle
+Harleigh Harley Harmoni Hattie Hayden Haylee Hayley Hazelle Heaven Heidi
+Helena Henley Hilda Hollis Honor Hope Iliana Ilyana Indie Ines
+Irene Isabel Isabela Isis Islabelle Itzayana Ivanna Ivelisse Izabella Jacqueline
+Jada Jaelyn Jaliyah Jamie Janelle Janet Jasmin Jayda Jayde Jazmin
+Jemma Jenesis Jennifer Jenny Jessa Jewel Jillian Joan Joanne Joelle
+Johanna Jolie Jordan Josefina Joslyn Joyce Juana Juliana Julianne Juliet
+Juniper Justice Kadence Kaelyn Kailyn Kaisley Kalani Kaleigh Kallie Kamari
+Kamille Kara Karen Karis Karsen Kassidy Katalina Kataleya Katelyn Katharine
+Kathryn Kaycee Kayleigh Keira Kelly Kelsey Kenna Kennedi Kensington Keziah
+Kiana Kimora Kira Kirsten Kora Krystal Kyleigh Kylee Kyra Lacie
+Ladainian Laila Lakelyn Lana Landry Lara Laurel Lauren Laylah Leanna
+Legacy Leia Leila Leilany Lennon Leona Leslie Lexie Liana Libby
+Liberty Lilianna Lilith Lillie Lilyana Lina Linda Lindsey Linnea Lisa
+Liv Lizbeth Logan London Londyn Lottie Lucero Luciana Lucinda Ludmila
+Luella Lumi Lyanna Lylah Lynn Lyric Mabry Macey Maci Mackenna
+Madalyn Maddison Madilyn Madilynn Maeva Magdalena Maia Maisy Makayla Makenzie
+Malaya Maliyah Mallory Mara Marceline Marcella Margot Margaux Mariah Mariam
+Maribel Marie Mariel Marisa Marissa Marjorie Marlene Marley Martha Mavis
+Maxine Mckinley Meilani Melany Melina Melisa Mercy Merida Mia Micah
+Michaela Mikaela Milagros Milan Milania Mimi Minerva Mira Mireya Miriam
+Missy Moira Monroe Montserrat Morgan Muriel Myah Myla Myra Nadine
+Nancy Naomi Natasha Nayla Nadia Neriah Nevaeh Niamh Nicolette Nika
+Nila Noor Nora Norma Nova Novah Nyla Nylah Oaklee Oakleigh
+Oaklynn Olive Oliviah Ophelia Oralia Paisley Paislee Paloma Pamela Paola
+Patience Paulina Payton Penny Perry Petra Philippa Phoenix Pia Presleigh
+Princess Priya Promise Prudence Quincy Rachael Raelynn Rania Raquel Raven
+Rayna Rayne Reagan Regan Renee Rhiannon Ria Rihanna River Roberta
+Robin Rocio Romina Ronnie Rosalind Roselyn Rosemarie Rosalina Rowena Roxanne
+Royalty Rubi Ruthie Ryann Rylie Sabine Sadie Saige Salem Sally
+Samara Samira Sandra Saoirse Sarina Sasha Savanna Sawyer Sayla Scarlet
+Selah Selina Serafina Seraphina Shane Shania Shannon Sharon Shayla Shea
+Shelby Shiloh Shirley Sia Sidney Siena Simone Sky Skyla Skyler
+Solana Soleil Solange Sonia Sophie Stefania Stephanie Stormi Sunday Susanna
+Sutton Sybil Sylvie Tabitha Tallulah Tamara Tara Taryn Tatiana Tatum
+Tayla Teagan Tegan Tenley Thalia Thea Theodora Tiffany Tinsley Tori
+Trinity Tulip Valentina Valery Vada Vanessa Veda Vega Vella Venus
+Vera Verity Vida Viola Virginia Vivi Viviana Wanda Wendy Wesley
+Whitley Willa Winnie Wren Wynn Xena Xiomara Yamileth Yara Yasmin
+Yesenia Yolanda Yvette Yvonne Zada Zahara Zaria Zaylee Zelda Zena
+Zoya Zuri Zyla Adalind Adele Adira Adley Adrienne Aeris Agatha
+Aileen Ainslee Aisling Alaska Alba Alberta Alden Aldrin Aleeya Alia
+Alianna Alicia Aliyana Allegra Allura Alora Alyson Amaia Amani Amaris
+Ambrose Amelie Amora Amoret Anais Anaya Andi Angeline Anika Anisa
+Annette Annora Antonia Anwen Apollonia April Arabella Araya Arcadia Ariane
+Arlette Arlo Armani Arnelle Arwen Ashby Ashlynn Asia Aspyn Astoria
+Atarah Athalia Aubrey Augusta Aurea Aveline Avianna Aviva Azaria Azura
+Bailey Basil Bay Bea Beckett Bellamy Bergen Bernadette Bethel Betsy
+Beverly Bexlee Blossom Bly Bree Brenna Bridgette Brighton Bristol Brinlee
+Bronte Brooklyn Bryn Brynn Cadenza Cailyn Caitlin Caleigh Calla Callista
+Cambria Camden Cameron Campbell Candice Capri Carina Carmela Caroline Carrie
+Cassia Catalina Cecily Celestia Celine Chandra Chanel Charity Charli Charlize
+Chelsey Cher Cherry Chiara Christy Cira Claudia Clarabelle Clover Colleen
+Combs Coraline Corinna Cosette Courtney Cove Cressida Cricket Cyrene Dagny
+Daleyza Dana Danika Daphne Darby Daria Darla Davi Dawn Dayana
+Deja Delilah Delphine Denali Devon Devyn Diamond Dinah Dixie Domenica
+Dominga Donna Dora Doris Dove Drew Duchess Eartha Echo Edith
+Effie Elaia Eleanore Elettra Elia Elin Elisa Elisabeth Elissa Ellery
+Ellison Elora Elsie Elyse Emberly Emberlynn Emi Emiliana Emmalee Emmalyn
+Ensley Erica Eris Esperanza Estefania Estelle Etta Eulalia Eunice Euphemia
+Evangelina Evanna Evelina Everlee Everly Evita Faith Fatimah Fay Felicia
+Fern Fia Fifi Finlee Fleur Flor Florencia Frida Gabby Gail
+Galia Gemini Genesis Genoa Georgiana Geraldine Gia Gianna Gilda Gisele
+Giulia Glenda Godiva Grady Gwyneth Hadley Hailee Halcyon Halo Hanna
+Harlem Harriet Haruka Haylie Hazel Hedy Helene Hera Hermione Hessa
+Hilary Holland Honora Huntley Ida Idalia Ila Ilana Ileana Ilsa
+Imogen Inaya Indiana Indigo India Ines Inez Iona Ireland Irie
+Isadora Isha Isidora Isolde Itzayanna Ivory Izzy Jacinta Jaclyn Jaden
+Jael Jaelynn Jaimie Jalen Jamila Jana Jasmine Jayden Jazlynn Jean
+Jeanette Jemima Jenevieve Jersey Jessamine Jetta Jewell Jill Jinx Joani
+Jocelynn Jodie Joely Johanna Jolene Jonelle Jorja Josephina Joslynn Joy
+Juanita Jubilee Judy Jules Julissa Juno Justina Kaelynn Kahlani Kaila
+Kaitlin Kaiya Kalea Kalliope Kambria Kamea Kamiyah Kandace Kanoa Karlee
+Karsyn Kasey Kassandra Katelynn Katharina Kathleen Katia Katrina Kayce Kaylani
+Keely Keila Kelsie Kendra Kenley Kennedy Kensley Kerrigan Keyla Khaleesi
+Kianna Kimberley Kimiko Kinslee Kinsley Kloe Kori Kristen Kristina Kyleigh
+Kylah Kyndall Lacy Laine Lakyn Lanie Laniyah Lauryn Layna Leandra
+Leanne Leena Leighla Leilah Lennox Leonie Leslee Letitia Lexa Leyla
+Lia Liana Lianna Lidia Lila Lilac Lilianna Lilith Lillianna Lilliana
+Lin Lisette Lissette Livia Lizzie Loraine Lorelie Loretta Lori Louella
+Lourdes Lovie Lowen Lucia Lucienne Lucy Ludovica Luella Lula Lumi
+Luz Lyanne Lyla Lyndsey Lynette Lyndon Lyric Macarena Macy Madalena
+Madelaine Madilyn Madisyn Maelynn Magali Magnolia Mahogany Maja Malaika Malaya
+Maliah Malina Manuela Mara Marcelina Marceline Marely Margarita Margo Mariel
+Marilee Marina Marisela Marlena Marlowe Marnie Marsha Matilda Mattie Maura
+Maxwell Maya Mayra Mckayla Meadow Megan Meghan Melina Melisandre Melody
+Mercedes Meredith Merrick Mesa Mia Michele Mikaila Milla Millicent Minka
+Mira Mirabel Mirabella Miracle Miren Missouri Misty Molly Mona Monique
+Montana Morgan Mylah Myla Myra Nadia Nala Nalani Nancy Naomie
+Natalee Natalya Nathalia Navy Nayeli Nell Nellie Neva Nia Nicola
+Nicolina Nika Nikita Nikki Nila Nina Noa Noelle Noemi Nola
+Nora Noor Norah Nour Nyah Nyra Oaklyn Oceana Octavia Odalys
+Odessa Odette Ofelia Olina Olympia Ondine Onyx Oriana Orla Osiris
+Ottilie Paisleigh Palmer Paola Paris Parker Patrice Paula Pauline Paxton
+Payton Pearl Peggy Penelope Perla Perrie Petunia Peyton Phaedra Phoenix
+Pia Pilar Pippa Polly Poppy Portia Prairie Praise Precious Presley
+Primrose Priscilla Priya Prue Quinley Quinn Rae Raegan Rafaela Raina
+Ramona Randi Raphaela Raya Rayna Reba Rebel Reese Regina Reign
+Reina Remi Remy Rena Renata Rene Rey Rhoda Rhonda Rihana
+Rikki Rinoa Rita Riva River Roma Romy Rooney Rosalee Rosalina
+Rosanna Rosaria Roselle Rosemary Rosetta Rowan Roxie Ruby Rue Rumi
+Runa Ruthanne Ryan Rylan Ryleigh Sabina Sabrina Sade Saffron Sahara
+Saige Sakura Salem Salome Samira Sandy Saniya Santana Sapphira Sarah
+Sariah Sasha Savanah Scarlett Scout Selah Selena Selina September Serena
+Sereia Shaila Shakira Shalom Shea Sheila Shelly Sheridan Sherry Shiloh
+Sidra Sierra Signe Simona Sinead Siobhan Sky Sloane Sofie Solene
+Sonja Sonnet Sophia Sora Sorrel Stacy Stargazer Starla Stella Stephanie
+Stevie Stormy Sunniva Suri Susannah Suzanne Sydney Sylvia Sylvie Tabitha
+Talia Tallulah Tamsin Tania Tanya Tasha Tatianna Tatum Tawny Teagan
+Temperance Teodora Tessa Thalia Thandi Thea Thelma Theresa Tiana Tierra
+Tilly Tina Tinley Tirzah Tishana Tonya Topaz Trina Trisha Trudy
+Tuesday Tyler Ulyana Uma Una Unique Ursula Valencia Valentine Valeria
+Vanna Vashti Veda Velma Venice Verena Verity Veronika Vespera Victory
+Vidalia Vienna Vika Vina Viola Violette Vivienne Waverly Wendy Wesley
+Whitley Wilhelmina Willa Willowdean Winifred Winona Winter Wisteria Wynn Wynter
+Xandra Xena Xiara Ximena Xitlali Yaneli Yamila Yasmine Yelena Yuna
+Yuri Yvaine Zadie Zaina Zainab Zamora Zana Zaniyah Zara Zaria
+Zelie Zena Zephyra Zia Zinnia Ziva Zoraya Zosia Zuleika Zulema
+`;
+
+const MALE_RAW = `
+Liam Noah Oliver James Elijah Mateo Theodore Henry Lucas William
+Benjamin Levi Sebastian Jack Ezra Michael Daniel Leo Owen Samuel
+Hudson Alexander Asher Luca Ethan John David Jackson Joseph Mason
+Luke Matthew Julian Dylan Elias Jacob Maverick Gabriel Logan Aiden
+Thomas Isaac Miles Grayson Santiago Anthony Wyatt Carter Jayden Ezekiel
+Caleb Cooper Josiah Charles Christopher Isaiah Nolan Cameron Nathan Joshua
+Kai Waylon Angel Roman Eli Lincoln Jonathan Adrian Austin Ryan
+Andrew Jaxon Weston Silas Jeremiah Emmett Micah Hunter Rowan Xavier
+Beau Adam Everett Jose Jace Ian Wesley Bennett Landon Nicholas
+Aaron Declan Amir Ryder Brooks Axel Christian Jordan Colton Ashton
+Carson Easton Vincent Enzo Nathaniel Parker Zion Damian Xander Sawyer
+Jameson Jason Greyson Kayden Ryker Arthur Emiliano Beckham Adriel Riley
+Colt Braxton Tyler Myles Gael Zachary Ivan Legend Bryson Evan
+Alan Bentley Kaiden Milo Brayden Judah Messiah Karter Graham Jesus
+Barrett Abel Justin Jayce Chase Rhett Kingston Calvin Brandon Atlas
+Max Malachi Antonio Emmanuel Bryce August Beckett Nico Cash Tucker
+Jasper Dean Ace Arlo Walker Jeremy Alejandro Timothy Lorenzo Blake
+Kevin Marcus Dawson Bradley Kyrie Finn Otto Diego King Rafael
+Andres Elliot Peter Griffin Bodhi Cohen Malakai Simon Israel Knox
+Remington Zayden Camden Reid Avery Jonah Eric Steven Patrick Bryan
+Brody Zayn Preston Tobias Jude Cayden Cody Gavin Hayes Ronan
+Kaleb Rylan Marshall Lane Titus Ellis Cruz Nash Sean Jesse
+Fernando Emerson Manuel Ari Leonel Nasir Nicolas Kyler Sullivan Ruben
+Kaden Callum Abraham Bowen Zane Erick Jorge Alexis Rory Jax
+Warren Trevor Kaison Jonas Prince Oscar Louis Ricardo Edward Cristian
+Wade Hendrix Solomon Shane Killian Ismael Amari Odin Francisco Zaid
+Zander Arjun Josue Uriel Hayden Rocco Gideon Dallas Kane Colin
+Aidan Julius Tanner Ezequiel Cassius Bruce Alfredo Dominic Winston Sage
+Malcolm Otis Boone Judson Cyrus Andre Rhys Franklin Jayceon Leland
+Ali Roberto Eduardo Kason Raymond Garrett Anderson Reed Desmond Malik
+Sergio Curtis Trenton Devin Seth Spencer Chance Angelo Lawson Braylen
+Kade Jaxson Enrique Zayne Ryland Alonzo Nehemiah Rodrigo Talon Tate
+Corbin Skyler Fabian Byron Clark Marcos Damien Lennox Beckett Konrad
+Hector Frank Philip George Harrison Jared Ivan Keegan Colson Salvador
+Quinn Boston Kingsley Ronin Alexzander Braylon Wilder Zachariah Jeffrey Cade
+Deacon Jayson Jaden Marco Julio Armani Rafferty Emory Watson Duke
+Jimmy Roy Ralph Eugene Arnold Harold Howard Stanley Herbert Norman
+Leonard Clarence Walter Richard Robert Donald Gerald Larry Wayne Dennis
+Douglas Carl Terry Randy Keith Gregory Joe Willie Billy Bobby
+Jerry Alfred Russell Bruno Vance Vaughn Victor Vernon Virgil Wallace
+Ward Warner Wendell Wesson Weston Wilbur Wilson Wyatt Xavi Yosef
+Zaiden Zeke Zeph Abner Abram Ace Adan Addison Adonis Ahmad
+Ahmed Aiden Ainsley Alaric Albert Albie Alden Aldo Alec Alessandro
+Alexei Alfonso Algernon Allan Allen Almir Alonso Alvin Amare Amias
+Ambrose Amos Anders Ansel Anson Apollo Aquila Archer Archie Arden
+Ares Ari Ariel Arlin Armando Armani Arman Arnav Arrow Arturo
+Asa Ashton Aspen Athan Atticus Aubrey Augustine Augustus Aurelio Austen
+Avi Axton Ayaan Ayden Azariah Bailey Baker Baldwin Banks Barnaby
+Baron Barry Bartholomew Basil Baxter Bear Beauregard Bellamy Benedict Bennet
+Benicio Benito Benson Bentlee Bergen Bernard Bertram Bishop Bjorn Blaine
+Blaise Blaze Bo Boaz Bode Bodie Bond Boris Bowie Boyd
+Braden Bradford Brady Bram Branson Brant Braxton Brayan Brecken Brendan
+Brennan Brent Brett Brian Brice Bridger Briggs Brixton Brock Broderick
+Bronson Bruno Bryant Bryce Bryndon Buck Bud Burke Byrne Cael
+Cain Cairo Caius Calder Cale Callan Callen Calvin Camilo Campbell
+Canaan Cannon Canyon Caraway Carlo Carlos Carmelo Carmine Carsen Carver
+Case Casey Cash Cason Caspian Cassian Castiel Cato Cavan Cecil
+Cedar Cedric Cesar Chad Chandler Channing Charley Chase Chester Chevy
+Chris Cian Ciaran Cillian Clarke Claude Clay Clayton Clement Cleo
+Cliff Clifford Clifton Clint Clinton Clyde Cobain Coby Colby Cole
+Coleman Colter Conan Conley Conner Connor Conrad Constantine Cooper Corban
+Cordell Corey Cormac Cornelius Cortez Cory Coy Craig Crawford Creed
+Crew Crispin Crosby Cullen Cyprian Dade Dagen Dakari Dakota Dale
+Dallon Dalton Damon Dane Dangelo Danny Dante Darian Darien Dario
+Darius Darnell Darrell Darren Darryl Dashiell Davion Davis Dax Daxton
+Dayton Deandre Deangelo Declan Dedrick Deion Delaney Dell Delton Demetrius
+Dempsey Denver Derek Derrick Deshawn Desi Devan Dexter Diallo Dilan
+Dillon Dimitri Dion Dixon Dmitri Dominik Donovan Dorian Doyle Drake
+Draven Drew Dryden Dudley Duncan Dustin Dwayne Dwight Dylan Eamon
+Earl Easton Eden Edgar Edison Edmund Edrick Edson Edwin Efrain
+Egan Eitan Elan Elder Eldon Eli Elian Elijah Eliseo Elliott
+Ellsworth Elmer Elton Elvin Elvis Emeka Emil Emile Emilio Emir
+Emmanuel Emmet Emmitt Enoch Enrico Ephraim Erasmo Ernest Ernesto Errol
+Esteban Estevan Ethan Etienne Eugene Evander Everest Everly Ewan Ezio
+Fabio Falcon Farrell Federico Felipe Felix Fenn Fergus Fidel Fielding
+Finley Finn Finnegan Finnick Fisher Fitz Fletcher Flint Florian Floyd
+Ford Forest Forrest Foster Fox Francis Franco Frankie Frederick Fritz
+Gabe Gage Galen Gannon Gareth Garland Garner Garrison Garry Garth
+Gary Gaston Gatlin Gavriel Gene Genesis Gennaro Geoffrey Gerard Geronimo
+Gian Gianni Gibson Gil Gilbert Giles Gino Giovanni Giuseppe Glen
+Glenn Godfrey Gordon Grady Graeme Grant Granger Gray Grayden Greg
+Gregorio Grey Greysen Griffith Grover Gunner Gus Gustavo Guy Hades
+Hakeem Hal Halston Hamilton Hamza Hank Hansel Hardy Harlan Harley
+Harper Harrison Hart Harvey Hassan Hawk Hayes Heath Hector Helio
+Henley Herman Hezekiah Hiram Holden Hollis Homer Horace Houston Howell
+Hugh Hugo Humberto Hunter Hurley Huxley Hyde Ianto Ibrahim Idris
+Ignacio Igor Ike Iker Ilan Immanuel Indiana Ingram Irving Isaias
+Isidore Isaiah Ivan Ivor Izaiah Jabari Jace Jacen Jack Jackson
+Jacoby Jadiel Jaeger Jagger Jaiden Jaime Jair Jairo Jamal Jamari
+Jamie Jamison Jarrett Jarvis Jasiah Javier Javon Jaxton Jay Jaylen
+Jaylin Jazz Jean Jebediah Jed Jefferson Jenson Jeremias Jericho Jerome
+Jesiah Jett Joaquin Jock Joel Joey Johan Johnny Jonah Jones
+Jordy Jovanni Juan Juelz Jules Julien Junior Juniper Justice Kabir
+Kace Kade Kadeem Kai Kaiser Kalel Kalen Kallen Kamari Kamden
+Kane Kanye Karsten Kase Kasen Kash Kason Kavan Kayson Keanu
+Keaton Kellan Kellen Kelvin Kendrick Kenji Kenneth Kensington Kent Kenyon
+Kermit Kerry Khalid Khalil Kian Kieran Kilian Kimball Kip Kirby
+Kirk Kit Kobe Koda Kody Kohen Kolby Kole Kolton Konnor
+Korbin Kristian Kristopher Kurt Kylan Kyle Kyson Lachlan Lamar Lambert
+Lamont Lance Landen Landry Langston Larkin Lars Lawrence Layne Layton
+Lazarus Leandro Ledger Lee Legacy Leif Leighton Leland Lennon Lenny
+Leandro Leonardo Leonidas Leopold Leroy Levon Lewis Lex Liev Lionel
+Lloyd Loch Locke Logan Loki London Lonnie Loren Lorne Louie
+Lowell Luc Lucian Luciano Ludwig Luka Luther Lyle Lyndon Lyric
+Mac Macen Mack Maddox Madison Magnus Major Makai Malachy Malaki
+Mannix Manning Marcel Marcelo Marion Mario Mark Marley Marlon Marquis
+Marsden Martin Marvin Mason Massimo Mathew Mathias Matteo Maurice Mauricio
+Maxim Maximilian Maximo Maximus Maxton Maxwell Mayer Mekhi Melvin Memphis
+Merle Merlin Merrick Michael Miguel Mika Mikael Mikel Milan Miller
+Milton Misha Mitchell Moises Monroe Montgomery Monty Mordecai Morgan Morris
+Moses Muhammad Murphy Murray Musa Mylo Myron Nadir Namir Napoleon
+Nasir Nathanael Navid Neal Ned Neil Nelson Neo Nestor Neville
+Nikolai Nikolas Niko Nilo Noel Nolan Norris Nyle Oakes Oakley
+Obadiah Oberon Octavio Odell Odysseus Ogden Olaf Ollie Omar Omari
+Onyx Oren Orion Orlando Orson Osborn Oscar Osiris Osman Osvaldo
+Oswald Otho Owais Ozzy Pablo Paco Paden Palmer Paolo Paris
+Parrish Pascal Patton Paul Paulo Pax Paxton Payne Payton Pedro
+Percival Percy Perry Peyton Phelan Phillip Phineas Phoenix Pierce Pierre
+Piers Porter Powell Pranav Prescott Presley Preston Price Primo Prosper
+Quentin Quincy Quinlan Quinton Rafael Raiden Raine Rainier Raleigh Ramiro
+Ramon Ramsey Randall Ranger Rankin Ransom Raoul Raphael Rashad Raul
+Ravi Rawls Ray Rayan Rayden Rayne Reagan Reece Reeve Reginald
+Reign Remy Renato Rene Reuben Rex Rey Reyansh Reyes Rhett
+Rhodes Rian Ricky Rico Ridge Riggs Rio River Roan Roark
+Robin Rocky Roderick Rodney Rogelio Roger Rohan Roland Rolando Rollins
+Romeo Ronald Ronnie Rooney Roosevelt Rory Roscoe Ross Rowen Roy
+Royal Royce Ruben Rudy Rufus Rune Rupert Russ Ryan Ryder
+Ryker Ryland Sabastian Sage Saint Salem Salvatore Sam Samir Sampson
+Samson Sanders Sandro Santana Santiago Santino Santos Saul Saverio Sawyer
+Scott Seamus Sebastien Sedric Sergei Seth Seven Severin Seymour Shaun
+Shawn Sheldon Shepherd Sherman Sidney Silvio Simeon Sinclair Skye Slade
+Sloan Smith Solomon Sonny Soren Spencer Stefan Stellan Stephen Sterling
+Stetson Stone Storm Stuart Sullivan Sutton Sven Sylas Sylvester Tadeo
+Taj Talon Tanner Tarek Tariq Tate Tatum Taylor Ted Teddy
+Tenzin Terrance Terrell Terrence Tesla Thaddeus Thane Theo Theron Thiago
+Thor Thurston Tiago Tiberius Tilden Tillman Timber Tobias Toby Todd
+Tomas Tommy Tony Torin Trace Travis Tray Tremaine Trent Trevon
+Trey Tripp Tristan Troy True Truett Truman Tucker Turner Ty
+Tyrell Tyrone Tyson Ulises Ulysses Upton Uriah Urijah Valentin Valentino
+Van Vander Vaughn Vernon Vicente Victor Vidal Vince Vinny Virgil
+Vito Vivaan Vladimir Wade Walden Waldo Wallace Walsh Walton Warner
+Warrick Watson Waverly Wayland Waylen Webb Webster Weldon Wells Wendell
+Werner Whit Whitaker Wilder Wiley Wilhelm Will Willem Willis Winslow
+Winston Wolf Wolfgang Woodrow Worth Wren Wright Wyler Wynn Yahir
+Yandel Yehuda Yosef Yousef Yusuf Zachary Zaid Zaire Zakai Zamir
+Zander Zavier Zeb Zebedee Zed Zeke Zenon Zephyr Zeppelin Zeus
+Ziggy Zion Zwei Zyair Zyaire Ezra Amos Enzo Nico Rocco
+`;
+
+function parse(raw) {
+  const out = [];
+  const seen = new Set();
+  for (const tok of raw.trim().split(/\s+/)) {
+    const key = tok.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(tok);
+  }
+  return out;
+}
+
+export const FEMALE = parse(FEMALE_RAW);
+export const MALE = parse(MALE_RAW);

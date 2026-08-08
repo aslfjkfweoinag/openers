@@ -1,37 +1,12 @@
-/* Service worker for openers/ — makes the installed app work with no signal.
- *
- * Scoped to this directory, so it never touches the rest of the site. (The
- * ArtistIQ worker at the repo root registers no fetch handler at all, so the two
- * do not interact.)
- *
- * Strategy is stale-while-revalidate: answer instantly from cache so the app
- * opens offline, then refresh the entry in the background so a deploy lands on
- * the next launch. Plain cache-first would pin a stale build forever.
- */
-
-const CACHE = 'openers-v1';
-
-const SHELL = [
-  './',
-  './index.html',
-  './styles.css',
-  './ui.js',
-  './manifest.webmanifest',
-  './icon.svg',
-  './icon-180.png',
-  './icon-512.png',
-  './src/names.js',
-  './src/lexicon.js',
-  './src/knowledge.js',
-  './src/engine.js',
-  './src/roster.js',
-];
+/* Offline cache for the published page. Stale-while-revalidate: answer from
+ * cache so it opens with no signal, then refresh in the background so a new
+ * upload lands on the next launch instead of being pinned forever. */
+const CACHE = 'openers-pages-v1';
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
-      // Individually, so one 404 can't fail the whole install and leave the app
-      // with no offline copy at all.
       .then((cache) => Promise.all(SHELL.map((url) => cache.add(url).catch(() => {}))))
       .then(() => self.skipWaiting()),
   );
@@ -49,7 +24,6 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
   if (new URL(request.url).origin !== self.location.origin) return;
-
   event.respondWith(
     caches.open(CACHE).then(async (cache) => {
       const cached = await cache.match(request);
@@ -59,7 +33,6 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => cached);
-      // Cached copy wins the race when there is one; otherwise wait for the wire.
       return cached || network;
     }),
   );

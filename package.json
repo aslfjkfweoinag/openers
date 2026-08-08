@@ -1,0 +1,12 @@
+{
+  "name": "openers",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Name-based dating opening lines for the 2000 most popular names in America",
+  "scripts": {
+    "build": "node build.js",
+    "test": "node test.js",
+    "start": "node cli.js"
+  }
+}

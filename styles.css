@@ -1,0 +1,332 @@
+/* Phone-first. The page is operated one-handed, standing up, in the middle of
+   doing something else — so: sticky search, big targets, one column, and type
+   sized for a screen held at arm's length. */
+
+:root {
+  --paper: #f6f6f3;
+  --panel: #ffffff;
+  --ink: #14171c;
+  --ink-2: #666d79;      /* grey biased blue, toward the accent */
+  --rule: #e2e4e0;
+  --accent: #2b49d6;
+  --accent-soft: #ebeefc;
+  --mark: #ffe45c;       /* highlighter — marks the name inside the line */
+  --mark-ink: #14171c;
+
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  --radius: 12px;
+  --tap: 44px;
+}
+
+/* Style through the tokens only, so the viewer's theme toggle can win in both
+   directions by redefining them. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0f1216;
+    --panel: #171b21;
+    --ink: #e9ecef;
+    --ink-2: #8a929e;
+    --rule: #262c34;
+    --accent: #8fa5ff;
+    --accent-soft: #1b2233;
+    --mark: #5a4d12;
+    --mark-ink: #ffe9a3;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0f1216;
+  --panel: #171b21;
+  --ink: #e9ecef;
+  --ink-2: #8a929e;
+  --rule: #262c34;
+  --accent: #8fa5ff;
+  --accent-soft: #1b2233;
+  --mark: #5a4d12;
+  --mark-ink: #ffe9a3;
+}
+
+:root[data-theme="light"] {
+  --paper: #f6f6f3;
+  --panel: #ffffff;
+  --ink: #14171c;
+  --ink-2: #666d79;
+  --rule: #e2e4e0;
+  --accent: #2b49d6;
+  --accent-soft: #ebeefc;
+  --mark: #ffe45c;
+  --mark-ink: #14171c;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 17px/1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  /* Stops iOS bumping the text size when the phone turns sideways. */
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px calc(56px + env(safe-area-inset-bottom));
+}
+
+/* --- masthead ------------------------------------------------------------- */
+.masthead {
+  padding: 28px 0 16px;
+}
+
+.masthead h1 {
+  margin: 0 0 6px;
+  font: 600 30px/1.15 var(--serif);
+  letter-spacing: -.01em;
+  text-wrap: balance;
+}
+
+.masthead p {
+  margin: 0;
+  max-width: 46ch;
+  color: var(--ink-2);
+  font-size: 15px;
+}
+
+/* --- sticky search -------------------------------------------------------- */
+/* On a phone you search, scroll, then want to search again — the box has to
+   still be there when you get back. */
+.searchbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 10px 0;
+  background: var(--paper);
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s;
+}
+
+.searchbar.stuck { border-bottom-color: var(--rule); }
+
+.search {
+  position: relative;
+  display: flex;
+  gap: 8px;
+}
+
+#name-input {
+  flex: 1;
+  min-width: 0;              /* or the input refuses to shrink and the page scrolls sideways */
+  height: var(--tap);
+  padding: 0 14px;
+  /* 16px minimum, or iOS Safari zooms the whole page on focus. */
+  font: 17px var(--sans);
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+#name-input:focus-visible,
+#name-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+#surprise {
+  height: var(--tap);
+  padding: 0 14px;
+  white-space: nowrap;
+  font: 15px var(--sans);
+  color: var(--ink-2);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+#suggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+  max-height: 46vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#suggest li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#suggest li.on { background: var(--accent-soft); }
+.s-name { font-weight: 600; }
+.s-meta { color: var(--ink-2); font: 12px var(--mono); }
+
+/* --- name header + filters ------------------------------------------------ */
+#result-meta {
+  margin: 20px 0 12px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+
+#result-meta strong {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--ink);
+  font: 600 24px/1.2 var(--serif);
+}
+
+#result-meta .stat { font-family: var(--mono); font-size: 13px; }
+
+/* Chips scroll sideways rather than wrapping into three rows on a phone. */
+#filters {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px 16px;
+  padding: 0 16px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+
+#filters::-webkit-scrollbar { display: none; }
+
+.fchip {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  min-height: 36px;
+  padding: 0 14px;
+  font: 14px var(--sans);
+  color: var(--ink-2);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.fchip.on {
+  color: var(--panel);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* --- lines ---------------------------------------------------------------- */
+#results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.line {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 12px 14px 12px;
+}
+
+.line-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font: 11px var(--mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.chip-pun, .chip-wordplay { color: var(--accent); }
+.cheese { margin-left: auto; letter-spacing: 1px; }
+
+.text { margin: 0 0 10px; overflow-wrap: break-word; }
+
+/* The whole tool is about spotting a name inside other words, so the name is
+   marked wherever it lands. */
+.text mark {
+  background: var(--mark);
+  color: var(--mark-ink);
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.copy {
+  width: 100%;
+  min-height: 38px;
+  font: 15px var(--sans);
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.copy.done { color: var(--panel); background: var(--accent); border-color: var(--accent); }
+
+#more {
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 12px;
+  font: 15px var(--sans);
+  color: var(--ink-2);
+  background: transparent;
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.empty { color: var(--ink-2); }
+
+/* --- footer --------------------------------------------------------------- */
+footer {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+footer p { margin: 0 0 8px; max-width: 52ch; }
+
+/* Hover styles only where there is a real pointer — on a phone they stick on
+   after a tap and read as a stuck selection. */
+@media (hover: hover) {
+  #surprise:hover, .fchip:hover, .copy:hover, #more:hover { color: var(--accent); border-color: var(--accent); }
+  .fchip.on:hover { color: var(--panel); }
+  #suggest li:hover { background: var(--accent-soft); }
+}
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+@media (min-width: 560px) {
+  .wrap { padding-bottom: 72px; }
+  .masthead { padding-top: 40px; }
+  .masthead h1 { font-size: 36px; }
+  .copy { width: auto; margin-left: auto; display: block; padding: 0 16px; }
+}
